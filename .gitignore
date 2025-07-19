@@ -20,6 +20,9 @@ node_modules/
 .env.local
 .env.*.local
 
+# Backend environment files
+backend/app/src/main/resources/application-dev.properties
+
 # Build outputs
 dist/
 build/
