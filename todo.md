@@ -15,9 +15,9 @@ _(Swap the emoji as you progress — dopamine hits guaranteed ✨)_
 ---
 
 - [ ] **Phase 0 – Dev & CI Setup**
-  - [ ] **0.1** Init mono‑repo (`frontend/`, `backend/`), LICENSE, README
-  - [ ] **0.2** Prettier, ESLint (TS + React rules), EditorConfig
-  - [ ] **0.3** Commit hooks via Husky + lint‑staged
+  - [x] **0.1** Init mono‑repo (`frontend/`, `backend/`), LICENSE, README
+  - [x] **0.2** Prettier, ESLint (TS + React rules), EditorConfig
+  - [x] **0.3** Commit hooks via Husky + lint‑staged
   - [ ] **0.4** GitHub Actions ➜ build, test, codecov badge
   - [ ] **0.5** Local `docker‑compose` with Postgres & Redis
   - [ ] **0.6** Backend Dockerfile (OpenJDK 21‑jlink)
