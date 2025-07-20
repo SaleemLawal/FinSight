@@ -50,4 +50,24 @@ public class GlobalExceptionHandler {
   public ResponseEntity<String> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
     return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
   }
+
+  @ExceptionHandler(UserNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handleUserNotFound(UserNotFoundException ex) {
+    Map<String, Object> errorResponse = new HashMap<>();
+    errorResponse.put("timestamp", LocalDateTime.now());
+    errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+    errorResponse.put("error", "Not Found");
+    errorResponse.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+  }
+
+  @ExceptionHandler(AccountNotFoundException.class)
+  public ResponseEntity<Map<String, Object>> handleAccountNotFound(AccountNotFoundException ex) {
+    Map<String, Object> errorResponse = new HashMap<>();
+    errorResponse.put("timestamp", LocalDateTime.now());
+    errorResponse.put("status", HttpStatus.NOT_FOUND.value());
+    errorResponse.put("error", "Not Found");
+    errorResponse.put("message", ex.getMessage());
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+  }
 }

@@ -3,7 +3,11 @@ package com.finsight.app.controller;
 import com.finsight.app.dto.UpdateAccountRequest;
 import com.finsight.app.model.Account;
 import com.finsight.app.service.AccountService;
+import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +31,7 @@ public class AccountController {
 
   @PostMapping()
   public ResponseEntity<com.finsight.app.dto.Account> createAccount(
-      @RequestBody Account account, @PathVariable String userId) throws Exception {
+      @Valid @RequestBody Account account, @PathVariable String userId) throws Exception {
     com.finsight.app.dto.Account accountCreated = accountService.createAccount(account, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
   }
@@ -35,7 +39,7 @@ public class AccountController {
   @PutMapping("/{accountId}")
   public ResponseEntity<com.finsight.app.dto.Account> updateAccount(
       @PathVariable Long accountId,
-      @RequestBody UpdateAccountRequest updateRequest,
+      @Valid @RequestBody UpdateAccountRequest updateRequest,
       @PathVariable String userId)
       throws Exception {
 
@@ -45,10 +49,16 @@ public class AccountController {
   }
 
   @DeleteMapping("/{accountId}")
-  public ResponseEntity<String> deleteAccount(
+  public ResponseEntity<Map<String, Object>> deleteAccount(
       @PathVariable Long accountId, @PathVariable String userId) throws Exception {
 
     accountService.deleteAccount(accountId, userId);
-    return ResponseEntity.ok("Success, account with id " + accountId + " deleted");
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("timestamp", LocalDateTime.now());
+    response.put("status", HttpStatus.OK.value());
+    response.put("message", "Account with id " + accountId + " deleted successfully");
+
+    return ResponseEntity.ok(response);
   }
 }

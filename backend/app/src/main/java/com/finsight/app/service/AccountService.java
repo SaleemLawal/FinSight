@@ -1,10 +1,12 @@
 package com.finsight.app.service;
 
 import com.finsight.app.dto.UpdateAccountRequest;
+import com.finsight.app.exception.AccountNotFoundException;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.repository.AccountRepository;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,9 +36,11 @@ public class AccountService {
 
   public List<com.finsight.app.dto.Account> getAccounts(String userId) throws Exception {
     com.finsight.app.dto.User loggedUser = userService.getCurrentUserDto(userId);
+    if (!Objects.equals(loggedUser.getId(), userId)) {
+      throw new UnauthorizedAccessException("Unauthorized user");
+    }
 
-    return accountRepository.findAll().stream()
-        .filter(account -> account.getUser().getEmail().equals(loggedUser.getEmail()))
+    return accountRepository.findByUserId(loggedUser.getId()).stream()
         .map(this::transformToDto)
         .collect(Collectors.toList());
   }
@@ -47,7 +51,8 @@ public class AccountService {
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
-            .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
+            .orElseThrow(
+                () -> new AccountNotFoundException("Account not found with id: " + accountId));
 
     if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
       throw new UnauthorizedAccessException("You are not authorized to update this account");
@@ -77,9 +82,10 @@ public class AccountService {
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
-            .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
+            .orElseThrow(
+                () -> new AccountNotFoundException("Account not found with id: " + accountId));
     if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
-      throw new UnauthorizedAccessException("You are not authorized to update this account");
+      throw new UnauthorizedAccessException("You are not authorized to delete this account");
     }
     accountRepository.deleteById(accountId);
   }

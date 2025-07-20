@@ -1,6 +1,7 @@
 package com.finsight.app.service;
 
 import com.finsight.app.exception.UserNotAuthenticatedException;
+import com.finsight.app.exception.UserNotFoundException;
 import com.finsight.app.model.User;
 import com.finsight.app.repository.UserRepository;
 import java.time.LocalDateTime;
@@ -30,7 +31,7 @@ public class UserService {
     if (user.isPresent()) {
       return user.get();
     }
-    throw new Exception("User not found");
+    throw new UserNotFoundException("User not found");
   }
 
   public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) throws Exception {
@@ -38,7 +39,7 @@ public class UserService {
     if (user.isPresent()) {
       return transformToDto(user.get());
     }
-    throw new Exception("User not found");
+    throw new UserNotFoundException("User not found");
   }
 
   public String authenticate(String email, String password) throws Exception {
