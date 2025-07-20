@@ -7,8 +7,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class User {
-    private Long id;
-    private String name;
-    private String email;
-    private LocalDateTime createdAt;
+  private Long id;
+  private String name;
+  private String email;
+  private LocalDateTime createdAt;
 }

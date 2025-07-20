@@ -6,20 +6,21 @@ import java.util.List;
 import lombok.*;
 
 @Entity
-@Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email")})
+@Table(
+    name = "users",
+    uniqueConstraints = {@UniqueConstraint(columnNames = "email")})
 @Data
-@NoArgsConstructor @AllArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 public class User {
-    @Id
-    @GeneratedValue()
-    private  Long id;
-    private String name;
-    private String email;
-    private String password;
+  @Id @GeneratedValue() private Long id;
+  private String name;
+  private String email;
+  private String password;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Account> accounts;
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  private List<Account> accounts;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
 }

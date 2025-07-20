@@ -1,10 +1,11 @@
 package com.finsight.app.service;
 
+import com.finsight.app.dto.UpdateAccountRequest;
+import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.repository.AccountRepository;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,12 +33,50 @@ public class AccountService {
   }
 
   public List<com.finsight.app.dto.Account> getAccounts() {
-    com.finsight.app.dto.User loggedUser = userService.getUserDto(152L);
+    com.finsight.app.dto.User loggedUser = userService.getUserDto(102L);
 
     return accountRepository.findAll().stream()
         .filter(account -> account.getUser().getEmail().equals(loggedUser.getEmail()))
         .map(this::transformToDto)
         .collect(Collectors.toList());
+  }
+
+  public com.finsight.app.dto.Account updateAccount(
+      Long accountId, UpdateAccountRequest updateRequest) {
+    com.finsight.app.model.User loggedUser = userService.getLoggedInUser(102L);
+    Account accountToUpdate =
+        accountRepository
+            .findById(accountId)
+            .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
+
+    if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
+      throw new UnauthorizedAccessException("You are not authorized to update this account");
+    }
+
+    if (updateRequest.getName() != null) {
+      accountToUpdate.setName(updateRequest.getName());
+    }
+    if (updateRequest.getType() != null) {
+      accountToUpdate.setType(updateRequest.getType());
+    }
+    if (updateRequest.getInstitution() != null) {
+      accountToUpdate.setInstitution(updateRequest.getInstitution());
+    }
+
+    Account updatedAccount = accountRepository.save(accountToUpdate);
+    return transformToDto(updatedAccount);
+  }
+
+  public void deleteAccount(Long accountId) {
+    com.finsight.app.model.User loggedUser = userService.getLoggedInUser(102L);
+    Account accountToUpdate =
+        accountRepository
+            .findById(accountId)
+            .orElseThrow(() -> new RuntimeException("Account not found with id: " + accountId));
+    if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
+      throw new UnauthorizedAccessException("You are not authorized to update this account");
+    }
+    accountRepository.deleteById(accountId);
   }
 
   public com.finsight.app.dto.Account transformToDto(Account account) {
