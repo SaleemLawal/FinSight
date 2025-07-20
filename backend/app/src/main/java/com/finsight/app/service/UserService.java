@@ -5,9 +5,7 @@ import com.finsight.app.model.User;
 import com.finsight.app.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
 import org.jetbrains.annotations.NotNull;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

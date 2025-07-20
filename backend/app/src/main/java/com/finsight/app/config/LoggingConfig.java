@@ -7,15 +7,15 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 @Configuration
 public class LoggingConfig {
 
-    @Bean
-    public CommonsRequestLoggingFilter requestLoggingFilter() {
-        CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
-        loggingFilter.setIncludeClientInfo(true);
-        loggingFilter.setIncludeQueryString(true);
-        loggingFilter.setIncludePayload(true);
-        loggingFilter.setMaxPayloadLength(64000);
-        loggingFilter.setIncludeHeaders(false);
-        loggingFilter.setAfterMessagePrefix("REQUEST DATA: ");
-        return loggingFilter;
-    }
-} 
+  @Bean
+  public CommonsRequestLoggingFilter requestLoggingFilter() {
+    CommonsRequestLoggingFilter loggingFilter = new CommonsRequestLoggingFilter();
+    loggingFilter.setIncludeClientInfo(true);
+    loggingFilter.setIncludeQueryString(true);
+    loggingFilter.setIncludePayload(true);
+    loggingFilter.setMaxPayloadLength(64000);
+    loggingFilter.setIncludeHeaders(false);
+    loggingFilter.setAfterMessagePrefix("REQUEST DATA: ");
+    return loggingFilter;
+  }
+}

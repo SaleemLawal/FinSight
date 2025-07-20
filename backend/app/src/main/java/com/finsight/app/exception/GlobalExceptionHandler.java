@@ -42,8 +42,7 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(UserNotAuthenticatedException.class)
-  public ResponseEntity<String> handleUserNotAuthenticated(
-      UserNotAuthenticatedException ex) {
+  public ResponseEntity<String> handleUserNotAuthenticated(UserNotAuthenticatedException ex) {
     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
   }
 

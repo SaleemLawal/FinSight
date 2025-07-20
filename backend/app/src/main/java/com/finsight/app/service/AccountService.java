@@ -1,7 +1,6 @@
 package com.finsight.app.service;
 
 import com.finsight.app.dto.UpdateAccountRequest;
-import com.finsight.app.dto.User;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.repository.AccountRepository;

@@ -20,26 +20,33 @@ public class AccountController {
   }
 
   @GetMapping()
-  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(@PathVariable String userId) throws Exception {
+  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(@PathVariable String userId)
+      throws Exception {
     return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
   }
 
   @PostMapping()
-  public ResponseEntity<com.finsight.app.dto.Account> createAccount(@RequestBody Account account, @PathVariable String userId) throws Exception {
+  public ResponseEntity<com.finsight.app.dto.Account> createAccount(
+      @RequestBody Account account, @PathVariable String userId) throws Exception {
     com.finsight.app.dto.Account accountCreated = accountService.createAccount(account, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
   }
 
   @PutMapping("/{accountId}")
   public ResponseEntity<com.finsight.app.dto.Account> updateAccount(
-      @PathVariable Long accountId, @RequestBody UpdateAccountRequest updateRequest, @PathVariable String userId) throws Exception {
+      @PathVariable Long accountId,
+      @RequestBody UpdateAccountRequest updateRequest,
+      @PathVariable String userId)
+      throws Exception {
 
-    com.finsight.app.dto.Account updatedAccount = accountService.updateAccount(accountId, updateRequest, userId);
+    com.finsight.app.dto.Account updatedAccount =
+        accountService.updateAccount(accountId, updateRequest, userId);
     return ResponseEntity.ok(updatedAccount);
   }
 
   @DeleteMapping("/{accountId}")
-  public ResponseEntity<String> deleteAccount(@PathVariable Long accountId, @PathVariable String userId) throws Exception {
+  public ResponseEntity<String> deleteAccount(
+      @PathVariable Long accountId, @PathVariable String userId) throws Exception {
 
     accountService.deleteAccount(accountId, userId);
     return ResponseEntity.ok("Success, account with id " + accountId + " deleted");

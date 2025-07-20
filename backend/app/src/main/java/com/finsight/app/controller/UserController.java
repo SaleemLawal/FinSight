@@ -3,7 +3,6 @@ package com.finsight.app.controller;
 import com.finsight.app.dto.LoginRequest;
 import com.finsight.app.model.User;
 import com.finsight.app.service.UserService;
-
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
