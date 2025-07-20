@@ -1,20 +1,24 @@
 package com.finsight.app.model;
 
 import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
+import java.util.List;
+import lombok.*;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {@UniqueConstraint(columnNames = "email")})
 @Data
 @NoArgsConstructor @AllArgsConstructor
-public class UserModel {
+public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue()
     private  Long id;
     private String name;
     private String email;
     private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Account> accounts;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

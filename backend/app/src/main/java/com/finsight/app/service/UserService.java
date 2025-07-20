@@ -1,26 +1,46 @@
 package com.finsight.app.service;
 
-import com.finsight.app.model.UserModel;
-import com.finsight.app.repository.UserRepo;
-import org.springframework.stereotype.Component;
-
+import com.finsight.app.exception.UserNotAuthenticatedException;
+import com.finsight.app.model.User;
+import com.finsight.app.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class UserService {
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
 
-    UserService(UserRepo userRepo){
-        this.userRepo = userRepo;
+    @Autowired
+    UserService(UserRepository userRepository){
+        this.userRepository = userRepository;
     }
 
-    public UserModel createUser(UserModel user){
+    public com.finsight.app.dto.User createUser(User user){
         user.setCreatedAt(LocalDateTime.now());
-        return userRepo.save(user);
+        User createdUser = userRepository.save(user);
+        return transformToDto(createdUser);
     }
 
-    public List<UserModel> getAllUser() {
-        return userRepo.findAll();
+    public User getLoggedInUser(Long id) {
+        return userRepository.findById(id)
+            .orElseThrow(() -> new UserNotAuthenticatedException("User not found with id: " + id));
+    }
+
+    public com.finsight.app.dto.User getUserDto(Long id){
+        User user = getLoggedInUser(id);
+        return transformToDto(user);
+    }
+
+    public List<com.finsight.app.dto.User> getAllUsersDto(){
+        return userRepository.findAll().stream()
+            .map(this::transformToDto)
+            .collect(Collectors.toList());
+    }
+
+    private com.finsight.app.dto.User transformToDto(User user){
+        return new com.finsight.app.dto.User(user.getId(), user.getName(), user.getEmail(), user.getCreatedAt());
     }
 }
