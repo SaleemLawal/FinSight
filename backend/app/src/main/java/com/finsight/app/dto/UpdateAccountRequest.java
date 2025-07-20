@@ -8,4 +8,6 @@ public class UpdateAccountRequest {
   private String name;
   private AccountType type;
   private String institution;
+  private String last4;
+  private Double balance;
 }

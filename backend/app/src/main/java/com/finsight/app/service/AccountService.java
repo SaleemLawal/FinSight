@@ -1,6 +1,7 @@
 package com.finsight.app.service;
 
 import com.finsight.app.dto.UpdateAccountRequest;
+import com.finsight.app.dto.User;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.repository.AccountRepository;
@@ -20,9 +21,8 @@ public class AccountService {
     this.userService = userService;
   }
 
-  public com.finsight.app.dto.Account createAccount(Account account) {
-    // get currently logged user
-    com.finsight.app.model.User loggedUser = userService.getLoggedInUser(102L);
+  public com.finsight.app.dto.Account createAccount(Account account, String userId) throws Exception {
+    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     account.setUser(loggedUser);
 
     // TODO make an account (Plaid API integration later)
@@ -32,8 +32,8 @@ public class AccountService {
     return transformToDto(createdAccount);
   }
 
-  public List<com.finsight.app.dto.Account> getAccounts() {
-    com.finsight.app.dto.User loggedUser = userService.getUserDto(102L);
+  public List<com.finsight.app.dto.Account> getAccounts(String userId) throws Exception {
+    com.finsight.app.dto.User loggedUser = userService.getCurrentUserDto(userId);
 
     return accountRepository.findAll().stream()
         .filter(account -> account.getUser().getEmail().equals(loggedUser.getEmail()))
@@ -42,8 +42,8 @@ public class AccountService {
   }
 
   public com.finsight.app.dto.Account updateAccount(
-      Long accountId, UpdateAccountRequest updateRequest) {
-    com.finsight.app.model.User loggedUser = userService.getLoggedInUser(102L);
+      Long accountId, UpdateAccountRequest updateRequest, String userId) throws Exception {
+    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
@@ -62,13 +62,18 @@ public class AccountService {
     if (updateRequest.getInstitution() != null) {
       accountToUpdate.setInstitution(updateRequest.getInstitution());
     }
-
+    if (updateRequest.getBalance() != null){
+        accountToUpdate.setBalance(updateRequest.getBalance());
+    }
+      if (updateRequest.getLast4() != null){
+          accountToUpdate.setLast4(updateRequest.getLast4());
+      }
     Account updatedAccount = accountRepository.save(accountToUpdate);
     return transformToDto(updatedAccount);
   }
 
-  public void deleteAccount(Long accountId) {
-    com.finsight.app.model.User loggedUser = userService.getLoggedInUser(102L);
+  public void deleteAccount(Long accountId, String userId) throws Exception {
+    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
@@ -85,6 +90,8 @@ public class AccountService {
         account.getName(),
         account.getType(),
         account.getInstitution(),
+        account.getLast4(),
+        account.getBalance(),
         account.getUser().getId(),
         account.getCreatedAt());
   }

@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api/account")
+@RequestMapping("/users/{userId}/accounts")
 public class AccountController {
   private final AccountService accountService;
 
@@ -19,29 +19,29 @@ public class AccountController {
     this.accountService = accountService;
   }
 
-  @GetMapping("/")
-  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts() {
-    return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts());
+  @GetMapping()
+  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(@PathVariable String userId) throws Exception {
+    return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
   }
 
-  @PostMapping("/")
-  public ResponseEntity<com.finsight.app.dto.Account> createAccount(@RequestBody Account account) {
-    com.finsight.app.dto.Account accountCreated = accountService.createAccount(account);
+  @PostMapping()
+  public ResponseEntity<com.finsight.app.dto.Account> createAccount(@RequestBody Account account, @PathVariable String userId) throws Exception {
+    com.finsight.app.dto.Account accountCreated = accountService.createAccount(account, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
   }
 
-  @PutMapping("/{id}")
+  @PutMapping("/{accountId}")
   public ResponseEntity<com.finsight.app.dto.Account> updateAccount(
-      @PathVariable Long id, @RequestBody UpdateAccountRequest updateRequest) {
+      @PathVariable Long accountId, @RequestBody UpdateAccountRequest updateRequest, @PathVariable String userId) throws Exception {
 
-    com.finsight.app.dto.Account updatedAccount = accountService.updateAccount(id, updateRequest);
+    com.finsight.app.dto.Account updatedAccount = accountService.updateAccount(accountId, updateRequest, userId);
     return ResponseEntity.ok(updatedAccount);
   }
 
-  @DeleteMapping("/{id}")
-  public ResponseEntity<String> deleteAccount(@PathVariable Long id) {
+  @DeleteMapping("/{accountId}")
+  public ResponseEntity<String> deleteAccount(@PathVariable Long accountId, @PathVariable String userId) throws Exception {
 
-    accountService.deleteAccount(id);
-    return ResponseEntity.ok("Success, account with id " + id + " deleted");
+    accountService.deleteAccount(accountId, userId);
+    return ResponseEntity.ok("Success, account with id " + accountId + " deleted");
   }
 }

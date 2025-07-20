@@ -42,15 +42,9 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(UserNotAuthenticatedException.class)
-  public ResponseEntity<Map<String, Object>> handleUserNotAuthenticated(
+  public ResponseEntity<String> handleUserNotAuthenticated(
       UserNotAuthenticatedException ex) {
-    Map<String, Object> errorResponse = new HashMap<>();
-    errorResponse.put("timestamp", LocalDateTime.now());
-    errorResponse.put("status", HttpStatus.UNAUTHORIZED.value());
-    errorResponse.put("error", "Unauthorized");
-    errorResponse.put("message", "User not authenticated");
-
-    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
+    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
   }
 
   @ExceptionHandler(UnauthorizedAccessException.class)
