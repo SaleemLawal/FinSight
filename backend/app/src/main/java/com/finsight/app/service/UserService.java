@@ -28,36 +28,35 @@ public class UserService {
   public com.finsight.app.model.User getCurrentUser(@NotNull String id) throws Exception {
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
-        return user.get();
+      return user.get();
     }
-      throw new Exception("User not found");
+    throw new Exception("User not found");
   }
 
-    public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) throws Exception {
-        Optional<User> user = userRepository.findById(id);
-        if (user.isPresent()) {
-            return transformToDto(user.get());
-        }
-        throw new Exception("User not found");
+  public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) throws Exception {
+    Optional<User> user = userRepository.findById(id);
+    if (user.isPresent()) {
+      return transformToDto(user.get());
     }
+    throw new Exception("User not found");
+  }
 
-  public String authenticate(String email, String password) throws Exception{
+  public String authenticate(String email, String password) throws Exception {
 
-      Optional<User> userOpt = userRepository.findByEmail(email);
+    Optional<User> userOpt = userRepository.findByEmail(email);
 
-      if (userOpt.isPresent()) {
-          User user = userOpt.get();
+    if (userOpt.isPresent()) {
+      User user = userOpt.get();
 
-          //Todo: Hash password
-          if (!user.getPassword().equals(password)) {
-              throw new UserNotAuthenticatedException("Invalid password");
-          }
-
-          return user.getId();
-      } else {
-          throw new UserNotAuthenticatedException("User not found");
+      // Todo: Hash password
+      if (!user.getPassword().equals(password)) {
+        throw new UserNotAuthenticatedException("Invalid password");
       }
 
+      return user.getId();
+    } else {
+      throw new UserNotAuthenticatedException("User not found");
+    }
   }
 
   private com.finsight.app.dto.User transformToDto(@NotNull User user) {

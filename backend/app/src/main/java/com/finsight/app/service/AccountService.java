@@ -20,7 +20,8 @@ public class AccountService {
     this.userService = userService;
   }
 
-  public com.finsight.app.dto.Account createAccount(Account account, String userId) throws Exception {
+  public com.finsight.app.dto.Account createAccount(Account account, String userId)
+      throws Exception {
     com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     account.setUser(loggedUser);
 
@@ -61,12 +62,12 @@ public class AccountService {
     if (updateRequest.getInstitution() != null) {
       accountToUpdate.setInstitution(updateRequest.getInstitution());
     }
-    if (updateRequest.getBalance() != null){
-        accountToUpdate.setBalance(updateRequest.getBalance());
+    if (updateRequest.getBalance() != null) {
+      accountToUpdate.setBalance(updateRequest.getBalance());
     }
-      if (updateRequest.getLast4() != null){
-          accountToUpdate.setLast4(updateRequest.getLast4());
-      }
+    if (updateRequest.getLast4() != null) {
+      accountToUpdate.setLast4(updateRequest.getLast4());
+    }
     Account updatedAccount = accountRepository.save(accountToUpdate);
     return transformToDto(updatedAccount);
   }
