@@ -3,6 +3,7 @@ package com.finsight.app.model;
 import com.finsight.app.util.AccountType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,7 +18,9 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
-  @Id @GeneratedValue() private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
   private String name;
 
@@ -31,6 +34,13 @@ public class Account {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "user_id")
   private User user;
+
+  @OneToMany(
+      cascade = CascadeType.ALL,
+      mappedBy = "account",
+      orphanRemoval = true,
+      fetch = FetchType.LAZY)
+  private List<Transaction> transactions;
 
   @CreatedDate
   @Column(name = "created_at")

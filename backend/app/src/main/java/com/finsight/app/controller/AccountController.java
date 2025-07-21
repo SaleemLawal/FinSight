@@ -38,7 +38,7 @@ public class AccountController {
 
   @PutMapping("/{accountId}")
   public ResponseEntity<com.finsight.app.dto.Account> updateAccount(
-      @PathVariable Long accountId,
+      @PathVariable String accountId,
       @Valid @RequestBody UpdateAccountRequest updateRequest,
       @PathVariable String userId)
       throws Exception {
@@ -50,7 +50,7 @@ public class AccountController {
 
   @DeleteMapping("/{accountId}")
   public ResponseEntity<Map<String, Object>> deleteAccount(
-      @PathVariable Long accountId, @PathVariable String userId) throws Exception {
+      @PathVariable String accountId, @PathVariable String userId) throws Exception {
 
     accountService.deleteAccount(accountId, userId);
 

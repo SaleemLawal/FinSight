@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface AccountRepository extends JpaRepository<Account, Long> {
-    List<Account> findByUserId(String userId);
+public interface AccountRepository extends JpaRepository<Account, String> {
+  List<Account> findByUserId(String userId);
+  //    Account findByUserId(String userId);
 }

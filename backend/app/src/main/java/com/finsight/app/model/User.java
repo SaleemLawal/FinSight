@@ -46,6 +46,13 @@ public class User {
       orphanRemoval = true)
   private List<Category> categories;
 
+  @OneToMany(
+      mappedBy = "user",
+      cascade = CascadeType.ALL,
+      fetch = FetchType.LAZY,
+      orphanRemoval = true)
+  private List<Transaction> transactions;
+
   @CreatedDate
   @Column(name = "created_at")
   private LocalDateTime createdAt;

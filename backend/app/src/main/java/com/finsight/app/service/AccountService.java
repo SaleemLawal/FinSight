@@ -46,7 +46,7 @@ public class AccountService {
   }
 
   public com.finsight.app.dto.Account updateAccount(
-      Long accountId, UpdateAccountRequest updateRequest, String userId) throws Exception {
+      String accountId, UpdateAccountRequest updateRequest, String userId) throws Exception {
     com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     Account accountToUpdate =
         accountRepository
@@ -77,7 +77,7 @@ public class AccountService {
     return transformToDto(updatedAccount);
   }
 
-  public void deleteAccount(Long accountId, String userId) throws Exception {
+  public void deleteAccount(String accountId, String userId) throws Exception {
     com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
     Account accountToUpdate =
         accountRepository
