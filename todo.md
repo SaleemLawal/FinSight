@@ -95,5 +95,95 @@ _(Swap the emoji as you progress — dopamine hits guaranteed ✨)_
 
 ### Scratchpad
 Use this for ad‑hoc todos, ideas, or hotfix notes.
-- [ ] …
+🔐 Security & UI Development Plan
+Phase 1: Critical Security Fixes (Backend) - URGENT
+
+Step 1: Password Security 🚨 CRITICAL
+- [ ] Add BCrypt dependency to pom.xml
+- [ ] Create PasswordEncoder bean in configuration
+- [ ] Update UserService.register() to hash passwords before saving
+- [ ] Update UserService.authenticate() to use BCrypt for password verification
+- [ ] Test password hashing with existing/new users
+
+Step 2: Session Security 🚨 HIGH PRIORITY
+- [ ] Add Spring Security dependency to pom.xml
+- [ ] Create SecurityConfig class with session management
+- [ ] Configure CSRF protection
+- [ ] Set secure session cookies (HttpOnly, Secure, SameSite)
+- [ ] Add session timeout configuration
+
+Step 3: Authorization Fix 🚨 HIGH PRIORITY
+- - [ ] Create authentication filter to validate user session
+- - [ ] Update controllers to use authenticated user ID instead of path variable
+- - [ ] Remove userId from URL paths (use session instead)
+- - [ ] Update frontend to not send userId in requests
+
+Phase 2: Basic UI Setup & Authentication
+Step 4: Frontend Project Setup
+- [ ] Initialize React project in frontend/ directory
+- [ ] Set up TypeScript configuration
+- [ ] Install essential dependencies (React Router, Axios, etc.)
+- [ ] Configure proxy for API calls to backend
+- [ ] Set up basic folder structure (components/, pages/, services/, etc.)
+
+Step 5: Authentication UI Components
+- - [ ] Create Login page component
+- - [ ] Create Register page component
+- - [ ] Create AuthContext for global auth state management
+- - [ ] Implement login form with validation
+- - [ ] Implement registration form with validation
+- - [ ] Add error handling and loading states
+
+Step 6: Authentication Service Integration
+- [ ] Create authService.js for API calls
+- [ ] Implement login API integration
+- [ ] Implement register API integration
+- [ ] Implement logout functionality
+- [ ] Add token/session management
+- [ ] Test authentication flow end-to-end
+
+Phase 3: Core UI Components
+Step 7: Dashboard Layout & Navigation
+- [ ] Create main Dashboard layout component
+- [ ] Implement sidebar navigation (matching spec requirements)
+- [ ] Create Header component with user info
+- [ ] Add protected route wrapper
+- [ ] Implement responsive design basics
+
+Step 8: Account Management UI
+- [ ] Create AccountList component
+- [ ] Create AccountCard component for individual accounts
+- [ ] Implement "Add New Account" form
+- [ ] Add account type icons and styling
+- [ ] Connect to accounts API endpoints
+
+Step 9: Basic Financial Data Display
+- [ ] Create NetWorth summary component
+- [ ] Create RecentTransactions placeholder component
+- [ ] Add basic charts library (Chart.js or Recharts)
+- [ ] Implement simple balance overview
+- [ ] Style financial data cards
+
+Phase 4: Enhanced Security & Polish
+
+Step 10: Advanced Security Features
+- [ ] Add rate limiting for login attempts
+- [ ] Implement password strength validation
+- [ ] Add HTTPS enforcement in production
+- [ ] Create audit logging for sensitive operations
+- [ ] Add request/response logging middleware
+
+Step 11: Error Handling & Validation
+- [ ] Create global error boundary for React
+- [ ] Implement form validation with proper error messages
+- [ ] Add loading spinners and skeleton screens
+- [ ] Create toast notifications for user feedback
+- [ ] Handle API error responses gracefully
+
+Step 12: Testing & Documentation
+- [ ] Add unit tests for critical security functions
+- [ ] Create integration tests for auth flow
+- [ ] Add React component tests for key UI elements
+- [ ] Document API endpoints with proper security notes
+- [ ] Create deployment security checklist
 
