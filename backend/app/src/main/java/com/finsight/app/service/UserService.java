@@ -8,25 +8,29 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
 
   private final UserRepository userRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
   @Autowired
-  UserService(UserRepository userRepository) {
-    this.userRepository = userRepository;
+  UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.userRepository = userRepository;
+      this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
   public com.finsight.app.dto.User register(User user) {
     user.setCreatedAt(LocalDateTime.now());
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
     User createdUser = userRepository.save(user);
     return transformToDto(createdUser);
   }
 
-  public com.finsight.app.model.User getCurrentUser(@NotNull String id) throws Exception {
+  public com.finsight.app.model.User getCurrentUser(@NotNull String id) {
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
       return user.get();
@@ -34,7 +38,7 @@ public class UserService {
     throw new UserNotFoundException("User not found");
   }
 
-  public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) throws Exception {
+  public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) {
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
       return transformToDto(user.get());
@@ -42,15 +46,13 @@ public class UserService {
     throw new UserNotFoundException("User not found");
   }
 
-  public String authenticate(String email, String password) throws Exception {
-
+  public String authenticate(String email, String password) {
     Optional<User> userOpt = userRepository.findByEmail(email);
 
     if (userOpt.isPresent()) {
       User user = userOpt.get();
 
-      // Todo: Hash password
-      if (!user.getPassword().equals(password)) {
+      if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
         throw new UserNotAuthenticatedException("Invalid password");
       }
 

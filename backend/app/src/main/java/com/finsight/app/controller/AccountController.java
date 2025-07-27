@@ -3,6 +3,7 @@ package com.finsight.app.controller;
 import com.finsight.app.dto.UpdateAccountRequest;
 import com.finsight.app.model.Account;
 import com.finsight.app.service.AccountService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -14,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users/{userId}/accounts")
+@RequestMapping("/users/accounts")
 public class AccountController {
   private final AccountService accountService;
 
@@ -24,14 +25,22 @@ public class AccountController {
   }
 
   @GetMapping()
-  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(@PathVariable String userId)
+  public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(HttpServletRequest request)
       throws Exception {
-    return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
+      String userId = (String) request.getSession().getAttribute("userId");
+      if (userId == null) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
+      return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
   }
 
   @PostMapping()
   public ResponseEntity<com.finsight.app.dto.Account> createAccount(
-      @Valid @RequestBody Account account, @PathVariable String userId) throws Exception {
+      @Valid @RequestBody Account account, HttpServletRequest request) throws Exception {
+      String userId = (String) request.getSession().getAttribute("userId");
+      if (userId == null) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
     com.finsight.app.dto.Account accountCreated = accountService.createAccount(account, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
   }
@@ -40,9 +49,12 @@ public class AccountController {
   public ResponseEntity<com.finsight.app.dto.Account> updateAccount(
       @PathVariable String accountId,
       @Valid @RequestBody UpdateAccountRequest updateRequest,
-      @PathVariable String userId)
+      HttpServletRequest request)
       throws Exception {
-
+      String userId = (String) request.getSession().getAttribute("userId");
+      if (userId == null) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
     com.finsight.app.dto.Account updatedAccount =
         accountService.updateAccount(accountId, updateRequest, userId);
     return ResponseEntity.ok(updatedAccount);
@@ -50,7 +62,11 @@ public class AccountController {
 
   @DeleteMapping("/{accountId}")
   public ResponseEntity<Map<String, Object>> deleteAccount(
-      @PathVariable String accountId, @PathVariable String userId) throws Exception {
+      @PathVariable String accountId, HttpServletRequest request) throws Exception {
+      String userId = (String) request.getSession().getAttribute("userId");
+      if (userId == null) {
+          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+      }
 
     accountService.deleteAccount(accountId, userId);
 

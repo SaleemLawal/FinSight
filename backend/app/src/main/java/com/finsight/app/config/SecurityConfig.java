@@ -15,10 +15,11 @@ public class SecurityConfig {
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
       http
-          .csrf(csrf -> csrf
-              .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
-              .ignoringRequestMatchers("/auth/**", "/auth/register")
-          )
+          .csrf(AbstractHttpConfigurer::disable)
+//          .csrf(csrf -> csrf
+//              .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+//              .ignoringRequestMatchers("/auth/**", "/auth/register")
+//          )
           .sessionManagement(session -> session
               .maximumSessions(1)
               .maxSessionsPreventsLogin(false)
@@ -28,9 +29,9 @@ public class SecurityConfig {
               .sessionFixation().migrateSession()
           )
           .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/auth/**", "/auth/register").permitAll()
-              .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-              .anyRequest().authenticated()
+//              .requestMatchers("/auth/**", "/auth/register").permitAll()
+//              .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+              .anyRequest().permitAll()
           )
           .formLogin(AbstractHttpConfigurer::disable)
           .httpBasic(AbstractHttpConfigurer::disable);

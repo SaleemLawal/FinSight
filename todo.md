@@ -99,24 +99,11 @@ Use this for ad‑hoc todos, ideas, or hotfix notes.
 Phase 1: Critical Security Fixes (Backend) - URGENT
 
 Step 1: Password Security 🚨 CRITICAL
-- [ ] Add BCrypt dependency to pom.xml
-- [ ] Create PasswordEncoder bean in configuration
-- [ ] Update UserService.register() to hash passwords before saving
-- [ ] Update UserService.authenticate() to use BCrypt for password verification
-- [ ] Test password hashing with existing/new users
-
-Step 2: Session Security 🚨 HIGH PRIORITY
-- [ ] Add Spring Security dependency to pom.xml
-- [ ] Create SecurityConfig class with session management
-- [ ] Configure CSRF protection
-- [ ] Set secure session cookies (HttpOnly, Secure, SameSite)
-- [ ] Add session timeout configuration
-
-Step 3: Authorization Fix 🚨 HIGH PRIORITY
-- - [ ] Create authentication filter to validate user session
-- - [ ] Update controllers to use authenticated user ID instead of path variable
-- - [ ] Remove userId from URL paths (use session instead)
-- - [ ] Update frontend to not send userId in requests
+- [X] Add BCrypt dependency to pom.xml
+- [X] Create PasswordEncoder bean in configuration
+- [X] Update UserService.register() to hash passwords before saving
+- [X] Update UserService.authenticate() to use BCrypt for password verification
+- [X] Test password hashing with existing/new users
 
 Phase 2: Basic UI Setup & Authentication
 Step 4: Frontend Project Setup
@@ -187,3 +174,16 @@ Step 12: Testing & Documentation
 - [ ] Document API endpoints with proper security notes
 - [ ] Create deployment security checklist
 
+Deferred
+Step 2: Session Security 🚨 HIGH PRIORITY
+- [ ] Add Spring Security dependency to pom.xml
+- [ ] Create SecurityConfig class with session management
+- [ ] Configure CSRF protection
+- [ ] Set secure session cookies (HttpOnly, Secure, SameSite)
+- [ ] Add session timeout configuration
+
+Step 3: Authorization Fix 🚨 HIGH PRIORITY
+- - [ ] Create authentication filter to validate user session
+- - [ ] Update controllers to use authenticated user ID instead of path variable
+- - [ ] Remove userId from URL paths (use session instead)
+- - [ ] Update frontend to not send userId in requests
