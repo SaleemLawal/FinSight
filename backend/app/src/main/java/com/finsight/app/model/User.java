@@ -39,6 +39,9 @@ public class User {
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Account> accounts;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<PlaidItem> plaidItems;
+
   @OneToMany(
       mappedBy = "user",
       cascade = CascadeType.ALL,

@@ -1,11 +1,13 @@
 package com.finsight.app.controller;
 
+import com.finsight.app.service.PlaidItemService;
 import com.finsight.app.service.PlaidService;
 import com.plaid.client.model.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import retrofit2.Response;
 
@@ -17,13 +19,15 @@ import java.util.Map;
 @RequestMapping("/api/plaid")
 public class PlaidController {
     private final PlaidService plaidService;
+    private final PlaidItemService plaidItemService;
 
     @Autowired
-    private PlaidController(PlaidService plaidService) {
+    private PlaidController(PlaidService plaidService, PlaidItemService plaidItemService) {
         this.plaidService = plaidService;
+        this.plaidItemService = plaidItemService;
     }
 
-    @PostMapping("/create_link_token")
+    @PostMapping("/create-token")
     public Map<String, String> createLinkToken(HttpServletRequest request) throws Exception {
         String userId = (String) request.getSession().getAttribute("userId");
 
@@ -33,15 +37,15 @@ public class PlaidController {
         return Map.of("link_token", response.body().getLinkToken());
     }
 
-    @GetMapping("/extract-public-token/{linkToken}")
-    public Map<String, String> extractPublicTokenOnly(@PathVariable String linkToken) throws IOException {
-        String publicToken = plaidService.extractPublicToken(linkToken);
-        return Map.of("public_token", publicToken);
-    }
+    @PostMapping("/exchange-token")
+    public ResponseEntity<?> exchangePublicToken(@RequestBody Map<String, String> body, HttpServletRequest request) throws IOException {
+        String userId = (String) request.getSession().getAttribute("userId");
+        String publicToken = body.get("public_token");
+        Map<String, String> response = plaidService.exchangePublicTokenForAccessToken(publicToken);
 
-    @GetMapping("/extract-access-token/{publicToken}")
-    public void extractAccessToken(@PathVariable String publicToken) throws IOException{
-        plaidService.getAccessToken(publicToken);
+        plaidItemService.createPlaidItem(userId, response.get("accessToken"), response.get("itemId"));
+
+        return ResponseEntity.ok().build();
     }
 
 }

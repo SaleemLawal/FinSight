@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PlaidService {
@@ -63,45 +65,16 @@ public class PlaidService {
         }
     }
 
-    public String extractPublicToken(String linkToken) throws IOException {
-        try {
-            logger.info("Extracting public token from link token");
-
-            LinkTokenGetResponse response = getPublicToken(linkToken);
-
-            if (response.getLinkSessions() != null && !response.getLinkSessions().isEmpty()) {
-                var linkSession = response.getLinkSessions().getFirst();
-
-                if (linkSession.getResults() != null &&
-                    linkSession.getResults().getItemAddResults() != null &&
-                    !linkSession.getResults().getItemAddResults().isEmpty()) {
-
-                    String publicToken = linkSession.getResults().getItemAddResults().getFirst().getPublicToken();
-                    logger.info("Successfully extracted public token");
-                    return publicToken;
-                }
-            }
-
-            logger.error("No public token found in link token response");
-            throw new RuntimeException("No public token found in response");
-
-        } catch (IOException e) {
-            logger.error("IO error extracting public token: ", e);
-            throw e;
-        } catch (Exception e) {
-            logger.error("Unexpected error extracting public token: ", e);
-            throw new RuntimeException("Unexpected error: " + e.getMessage());
-        }
-    }
-
-    public void getAccessToken(String publicToken) throws IOException {
+    public Map<String, String> exchangePublicTokenForAccessToken(String publicToken) throws IOException {
         try{
             ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest().publicToken(publicToken);
             Response<ItemPublicTokenExchangeResponse> response = plaidApi.itemPublicTokenExchange(request).execute();
             assert response.body() != null;
-            String accessToken = response.body().getAccessToken();
-            System.out.println(accessToken);
-      // Todo: Store in DB (access_token -> id)
+
+            Map<String, String> res = new HashMap<>();
+            res.put("accessToken", response.body().getAccessToken());
+            res.put("itemId", response.body().getItemId());
+            return res;
     } catch (IOException e) {
           logger.error("IO error getting link token details: ", e);
           throw e;
