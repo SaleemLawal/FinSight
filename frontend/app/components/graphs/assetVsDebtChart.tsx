@@ -49,11 +49,9 @@ export default function AssetsVsDebtCardChart({ data }: { data: Point[] }) {
                     <YAxis hide domain={["auto", "auto"]} />
                     <ReferenceLine
                         ifOverflow="extendDomain"
-                        x={data[lastIdx]?.date}
                         stroke="#444c55"
                         strokeWidth={2}
                         strokeDasharray="1 6"
-                        isFront
                     />
                     <Tooltip content={<MiniTooltip />} cursor={false} />
 
@@ -72,7 +70,7 @@ export default function AssetsVsDebtCardChart({ data }: { data: Point[] }) {
                                     stroke="#ff9264"
                                     strokeWidth={2}
                                 />
-                            ) : null
+                            ) : <></>
                         }
                         activeDot={false}
                     />
@@ -92,7 +90,7 @@ export default function AssetsVsDebtCardChart({ data }: { data: Point[] }) {
                                     stroke="#6fa8ff"
                                     strokeWidth={2}
                                 />
-                            ) : null
+                            ) : <></>
                         }
                         activeDot={false}
                     />
