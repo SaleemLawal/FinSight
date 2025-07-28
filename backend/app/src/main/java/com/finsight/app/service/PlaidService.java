@@ -1,5 +1,7 @@
 package com.finsight.app.service;
 
+import com.finsight.app.model.Account;
+import com.finsight.app.model.User;
 import com.plaid.client.model.*;
 import com.plaid.client.request.PlaidApi;
 import org.slf4j.Logger;
@@ -11,6 +13,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PlaidService {
@@ -81,5 +84,35 @@ public class PlaidService {
     }catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public List<Account> getAccountFromAccessToken(String accessToken, User user) {
+        try{
+            AccountsGetRequest request = new AccountsGetRequest().accessToken(accessToken);
+            Response<AccountsGetResponse> response = plaidApi.accountsGet(request).execute();
+            if (!response.isSuccessful()) {
+                throw new RuntimeException("Failed to get accounts from Plaid");
+            }
+
+            assert response.body() != null;
+            List<AccountBase> plaidAccounts = response.body().getAccounts();
+
+            return plaidAccounts.stream().map(account -> transformToAccount(account, user)).collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public Account transformToAccount(AccountBase plaidAccount, User user){
+        return new Account(plaidAccount.getName(), mapPlaidAccountType(plaidAccount.getType()),"TEST", plaidAccount.getMask(), plaidAccount.getBalances().getCurrent(), user);
+    }
+
+    private com.finsight.app.util.AccountType mapPlaidAccountType(com.plaid.client.model.AccountType plaidType) {
+        return switch (plaidType) {
+            case CREDIT -> com.finsight.app.util.AccountType.CREDIT;
+            case LOAN -> com.finsight.app.util.AccountType.LOAN;
+            case INVESTMENT -> com.finsight.app.util.AccountType.INVESTMENT;
+            default -> com.finsight.app.util.AccountType.DEPOSITORY;
+        };
     }
 }

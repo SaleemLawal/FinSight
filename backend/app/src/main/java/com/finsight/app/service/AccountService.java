@@ -24,12 +24,8 @@ public class AccountService {
 
   public com.finsight.app.dto.Account createAccount(Account account, String userId)
       throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
-    account.setUser(loggedUser);
-
     // TODO make an account (Plaid API integration later)
 
-    // save it
     Account createdAccount = accountRepository.save(account);
     return transformToDto(createdAccount);
   }

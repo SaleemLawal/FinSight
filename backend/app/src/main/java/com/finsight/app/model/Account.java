@@ -3,6 +3,7 @@ package com.finsight.app.model;
 import com.finsight.app.util.AccountType;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
+    public Account(String name, AccountType type, String institution, String last4, Double balance, User user) {
+        this.name = name;
+        this.type = type;
+        this.institution = institution;
+        this.last4 = last4;
+        this.balance = balance;
+        this.user = user;
+        this.transactions = new ArrayList<>();
+    }
+
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
