@@ -1,0 +1,112 @@
+package com.finsight.app.service;
+
+import com.plaid.client.model.*;
+import com.plaid.client.request.PlaidApi;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import retrofit2.Response;
+
+import java.io.IOException;
+import java.util.List;
+
+@Service
+public class PlaidService {
+
+    private static final Logger logger = LoggerFactory.getLogger(PlaidService.class);
+
+    private final PlaidApi plaidApi;
+
+    public PlaidService(PlaidApi plaidApi) {
+        this.plaidApi = plaidApi;
+    }
+
+    public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
+        LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser();
+        user.setClientUserId(userId);
+
+        LinkTokenCreateRequest request = new LinkTokenCreateRequest();
+        request.setUser(user);
+        request.setClientName("Finsight App");
+        request.setProducts(List.of(Products.TRANSACTIONS));
+        request.setLanguage("en");
+        request.setCountryCodes(List.of(CountryCode.US));
+
+        return plaidApi.linkTokenCreate(request).execute();
+    }
+
+    public LinkTokenGetResponse getPublicToken(String linkToken) throws IOException {
+        try {
+            logger.info("Getting details for public token");
+
+            LinkTokenGetRequest request = new LinkTokenGetRequest().linkToken(linkToken);
+            Response<LinkTokenGetResponse> response = plaidApi.linkTokenGet(request).execute();
+
+            if (response.isSuccessful()) {
+                assert response.body() != null;
+                logger.info("Successfully retrieved link token details");
+                return response.body();
+            } else {
+                String errorMsg = "Failed to get link token details. HTTP Code: " + response.code();
+                if (response.errorBody() != null) {
+                    errorMsg += ", Error: " + response.errorBody().string();
+                }
+                logger.error(errorMsg);
+                throw new RuntimeException(errorMsg);
+            }
+        } catch (IOException e) {
+            logger.error("IO error getting link token details: ", e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error getting link token details: ", e);
+            throw new RuntimeException("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    public String extractPublicToken(String linkToken) throws IOException {
+        try {
+            logger.info("Extracting public token from link token");
+
+            LinkTokenGetResponse response = getPublicToken(linkToken);
+
+            if (response.getLinkSessions() != null && !response.getLinkSessions().isEmpty()) {
+                var linkSession = response.getLinkSessions().getFirst();
+
+                if (linkSession.getResults() != null &&
+                    linkSession.getResults().getItemAddResults() != null &&
+                    !linkSession.getResults().getItemAddResults().isEmpty()) {
+
+                    String publicToken = linkSession.getResults().getItemAddResults().getFirst().getPublicToken();
+                    logger.info("Successfully extracted public token");
+                    return publicToken;
+                }
+            }
+
+            logger.error("No public token found in link token response");
+            throw new RuntimeException("No public token found in response");
+
+        } catch (IOException e) {
+            logger.error("IO error extracting public token: ", e);
+            throw e;
+        } catch (Exception e) {
+            logger.error("Unexpected error extracting public token: ", e);
+            throw new RuntimeException("Unexpected error: " + e.getMessage());
+        }
+    }
+
+    public void getAccessToken(String publicToken) throws IOException {
+        try{
+            ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest().publicToken(publicToken);
+            Response<ItemPublicTokenExchangeResponse> response = plaidApi.itemPublicTokenExchange(request).execute();
+            assert response.body() != null;
+            String accessToken = response.body().getAccessToken();
+            System.out.println(accessToken);
+      // Todo: Store in DB (access_token -> id)
+    } catch (IOException e) {
+          logger.error("IO error getting link token details: ", e);
+          throw e;
+    }catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
