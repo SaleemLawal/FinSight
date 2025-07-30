@@ -14,5 +14,5 @@ public class Category {
   private String color;
   private String icon;
   private boolean isDefault;
-  private String UserId;
+  private String userId;
 }

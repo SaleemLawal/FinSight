@@ -2,7 +2,6 @@ package com.finsight.app.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,16 +27,8 @@ public class Category {
 
   private boolean isDefault;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
-
-  @OneToMany(
-      cascade = CascadeType.ALL,
-      mappedBy = "category",
-      orphanRemoval = true,
-      fetch = FetchType.LAZY)
-  private List<Transaction> transactions;
+  @Column(name = "user_id")
+  private String userId;
 
   @CreatedDate
   @Column(name = "created_at")

@@ -12,8 +12,8 @@ public class Account {
   private String name;
   private AccountType type;
   private String institution_name;
-    private String institution_id;
-    private String last_four;
+  private String institution_id;
+  private String last_four;
   private Double balance;
   private String userId;
   private LocalDateTime createdAt;

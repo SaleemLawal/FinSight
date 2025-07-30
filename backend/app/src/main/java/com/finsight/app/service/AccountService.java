@@ -6,7 +6,6 @@ import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.repository.AccountRepository;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,33 +23,34 @@ public class AccountService {
 
   public com.finsight.app.dto.Account createAccount(Account account, String userId)
       throws Exception {
-    // TODO make an account (Plaid API integration later)
-
+    // Validate user exists
+    userService.getCurrentUser(userId);
+    account.setUserId(userId);
     Account createdAccount = accountRepository.save(account);
     return transformToDto(createdAccount);
   }
 
   public List<com.finsight.app.dto.Account> getAccounts(String userId) throws Exception {
-    com.finsight.app.dto.User loggedUser = userService.getCurrentUserDto(userId);
-    if (!Objects.equals(loggedUser.getId(), userId)) {
-      throw new UnauthorizedAccessException("Unauthorized user");
-    }
+    // Validate user exists
+    userService.getCurrentUser(userId);
 
-    return accountRepository.findByUserId(loggedUser.getId()).stream()
+    return accountRepository.findByUserId(userId).stream()
         .map(this::transformToDto)
         .collect(Collectors.toList());
   }
 
   public com.finsight.app.dto.Account updateAccount(
       String accountId, UpdateAccountRequest updateRequest, String userId) throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    // Validate user exists
+    userService.getCurrentUser(userId);
+
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
             .orElseThrow(
                 () -> new AccountNotFoundException("Account not found with id: " + accountId));
 
-    if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
+    if (!accountToUpdate.getUserId().equals(userId)) {
       throw new UnauthorizedAccessException("You are not authorized to update this account");
     }
 
@@ -74,13 +74,14 @@ public class AccountService {
   }
 
   public void deleteAccount(String accountId, String userId) throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
+
     Account accountToUpdate =
         accountRepository
             .findById(accountId)
             .orElseThrow(
                 () -> new AccountNotFoundException("Account not found with id: " + accountId));
-    if (!accountToUpdate.getUser().getId().equals(loggedUser.getId())) {
+    if (!accountToUpdate.getUserId().equals(userId)) {
       throw new UnauthorizedAccessException("You are not authorized to delete this account");
     }
     accountRepository.deleteById(accountId);
@@ -95,7 +96,7 @@ public class AccountService {
         account.getInstitutionId(),
         account.getLastFour(),
         account.getBalance(),
-        account.getUser().getId(),
+        account.getUserId(),
         account.getCreatedAt());
   }
 }

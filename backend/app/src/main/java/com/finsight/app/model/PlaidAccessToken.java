@@ -7,26 +7,26 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "plaid")
+@Table(name = "plaid_access_tokens")
 @EntityListeners(AuditingEntityListener.class)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlaidAccessToken {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
-    private String itemId;
-    private String accessToken;
+  private String itemId;
+  private String accessToken;
+  private String cursor = null;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+  @Column(name = "user_id")
+  private String userId;
 
-    public PlaidAccessToken(String itemId, String accessToken, User loggedUser) {
-        this.itemId = itemId;
-        this.accessToken = accessToken;
-        this.user = loggedUser;
-    }
+  public PlaidAccessToken(String itemId, String accessToken, String userId) {
+    this.itemId = itemId;
+    this.accessToken = accessToken;
+    this.userId = userId;
+  }
 }

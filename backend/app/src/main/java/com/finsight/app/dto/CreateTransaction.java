@@ -1,6 +1,6 @@
 package com.finsight.app.dto;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateTransaction {
-  private Date date;
+  private LocalDateTime date;
   private String merchant;
   private String description;
   private Double amount;

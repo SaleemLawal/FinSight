@@ -8,11 +8,13 @@ import com.finsight.app.exception.TransactionNotFoundException;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.model.Category;
+import com.finsight.app.model.PlaidAccessToken;
 import com.finsight.app.repository.AccountRepository;
 import com.finsight.app.repository.CategoryRepository;
 import com.finsight.app.repository.TransactionRepository;
+import com.finsight.app.util.TransactionSyncResult;
+import com.plaid.client.model.Transaction;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,41 +42,43 @@ public class TransactionService {
   public com.finsight.app.dto.Transaction createTransaction(
       CreateTransaction payload, String userId) throws Exception {
     com.finsight.app.model.Transaction transaction = new com.finsight.app.model.Transaction();
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
-    // find a corresponding account / category
-    Optional<Account> account = accountRepository.findById(payload.getAccountId());
-    if (account.isPresent()) {
-      Optional<Category> category = categoryRepository.findById(payload.getCategoryId());
-      if (category.isPresent()) {
-        transaction.setUser(loggedUser);
-        transaction.setAccount(account.get());
-        transaction.setCategory(category.get());
-        transaction.setDate(payload.getDate());
-        transaction.setMerchant(payload.getMerchant());
-        transaction.setDescription(payload.getDescription());
-        transaction.setAmount(payload.getAmount());
-        transaction.setIsReviewed(payload.getIsReviewed());
-        transaction.setIsRecurring(payload.getIsRecurring());
+    userService.getCurrentUser(userId);
 
-        // save it
-        com.finsight.app.model.Transaction createdTransaction =
-            transactionRepository.save(transaction);
-        return transformToDto(createdTransaction);
-      } else {
-        throw new CategoryNotFoundException("Category not found");
-      }
-    } else {
+    // Validate account exists and belongs to user
+    Optional<Account> account = accountRepository.findById(payload.getAccountId());
+    if (account.isEmpty()) {
       throw new AccountNotFoundException("Account not found");
     }
+    if (!account.get().getUserId().equals(userId)) {
+      throw new UnauthorizedAccessException("Account does not belong to user");
+    }
+
+    Optional<Category> category = categoryRepository.findById(payload.getCategoryId());
+    if (category.isEmpty()) {
+      throw new CategoryNotFoundException("Category not found");
+    }
+    if (!category.get().getUserId().equals(userId)) {
+      throw new UnauthorizedAccessException("Category does not belong to user");
+    }
+
+    transaction.setUserId(userId);
+    transaction.setAccountId(payload.getAccountId());
+    transaction.setCategoryId(payload.getCategoryId());
+    transaction.setDate(payload.getDate());
+    transaction.setMerchant(payload.getMerchant());
+    transaction.setDescription(payload.getDescription());
+    transaction.setAmount(payload.getAmount());
+    transaction.setIsReviewed(payload.getIsReviewed());
+    transaction.setIsRecurring(payload.getIsRecurring());
+
+    com.finsight.app.model.Transaction createdTransaction = transactionRepository.save(transaction);
+    return transformToDto(createdTransaction);
   }
 
   public List<com.finsight.app.dto.Transaction> getTransactions(String userId) throws Exception {
-    com.finsight.app.dto.User loggedUser = userService.getCurrentUserDto(userId);
-    if (!Objects.equals(loggedUser.getId(), userId)) {
-      throw new UnauthorizedAccessException("Unauthorized user");
-    }
+    userService.getCurrentUser(userId);
 
-    return transactionRepository.findByUserId(loggedUser.getId()).stream()
+    return transactionRepository.findByUserId(userId).stream()
         .map(this::transformToDto)
         .collect(Collectors.toList());
   }
@@ -82,7 +86,8 @@ public class TransactionService {
   public com.finsight.app.dto.Transaction updateTransaction(
       String transactionId, UpdateTransactionRequest updateRequest, String userId)
       throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
+
     com.finsight.app.model.Transaction transactionToUpdate =
         transactionRepository
             .findById(transactionId)
@@ -91,7 +96,7 @@ public class TransactionService {
                     new TransactionNotFoundException(
                         "Transaction not found with id: " + transactionId));
 
-    if (!transactionToUpdate.getUser().getId().equals(loggedUser.getId())) {
+    if (!transactionToUpdate.getUserId().equals(userId)) {
       throw new UnauthorizedAccessException("You are not authorized to update this transaction");
     }
 
@@ -115,10 +120,15 @@ public class TransactionService {
     }
 
     if (updateRequest.getCategoryId() != null) {
-      // check if the category is valid
-      if (categoryRepository.existsById(updateRequest.getCategoryId())) {
-        transactionToUpdate.setIsReviewed(updateRequest.getIsReviewed());
+      // Validate category exists and belongs to user
+      Optional<Category> category = categoryRepository.findById(updateRequest.getCategoryId());
+      if (category.isEmpty()) {
+        throw new CategoryNotFoundException("Category not found");
       }
+      if (!category.get().getUserId().equals(userId)) {
+        throw new UnauthorizedAccessException("Category does not belong to user");
+      }
+      transactionToUpdate.setCategoryId(updateRequest.getCategoryId());
     }
 
     com.finsight.app.model.Transaction updatedTransaction =
@@ -127,7 +137,8 @@ public class TransactionService {
   }
 
   public void deleteTransaction(String transactionId, String userId) throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
+
     com.finsight.app.model.Transaction transactionToUpdate =
         transactionRepository
             .findById(transactionId)
@@ -135,13 +146,26 @@ public class TransactionService {
                 () ->
                     new TransactionNotFoundException(
                         "Transaction not found with id: " + transactionId));
-    if (!transactionToUpdate.getUser().getId().equals(loggedUser.getId())) {
+    if (!transactionToUpdate.getUserId().equals(userId)) {
       throw new UnauthorizedAccessException("You are not authorized to delete this transaction");
     }
     transactionRepository.deleteById(transactionId);
   }
 
-  public com.finsight.app.dto.Transaction transformToDto(
+  private void SyncTransactionsToDB(TransactionSyncResult transactionSyncResult) {
+    //      List<Transaction> added = transactionSyncResult.getAdded();
+    List<Transaction> modified = transactionSyncResult.getModified();
+    List<com.plaid.client.model.RemovedTransaction> removed = transactionSyncResult.getRemoved();
+    PlaidAccessToken plaidAccessToken = transactionSyncResult.getPlaidAccessToken();
+
+    for (Transaction txn : transactionSyncResult.getAdded()) {
+      if (!transactionRepository.existsById(txn.getTransactionId())) {
+        //              transactionRepository.save();
+      }
+    }
+  }
+
+  private com.finsight.app.dto.Transaction transformToDto(
       com.finsight.app.model.Transaction transaction) {
     return new com.finsight.app.dto.Transaction(
         transaction.getId(),
@@ -151,10 +175,22 @@ public class TransactionService {
         transaction.getAmount(),
         transaction.getIsReviewed(),
         transaction.getIsRecurring(),
-        transaction.getAccount().getId(),
-        transaction.getCategory().getId(),
-        transaction.getUser().getId(),
+        transaction.getAccountId(),
+        transaction.getCategoryId(),
+        transaction.getUserId(),
         transaction.getCreatedAt(),
         transaction.getUpdatedAt());
+  }
+
+  private com.finsight.app.model.Transaction toEntity(Transaction txn, String userId) {
+    return new com.finsight.app.model.Transaction(
+        txn.getTransactionId(),
+        txn.getDate().atStartOfDay(),
+        txn.getMerchantName(),
+        txn.getAmount(),
+        txn.getPending(),
+        txn.getAccountId(),
+        txn.getCategoryId(),
+        userId);
   }
 }

@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface PlaidItemRepository extends JpaRepository<PlaidAccessToken, String> {}
+public interface PlaidAccessTokenRepository extends JpaRepository<PlaidAccessToken, String> {
+  PlaidAccessToken findByAccessToken(String accessToken);
+}

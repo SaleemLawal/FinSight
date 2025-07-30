@@ -2,7 +2,6 @@ package com.finsight.app.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,31 +17,31 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 public class Transaction {
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+  //  @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
-  private Date date;
+  private LocalDateTime date;
   private String merchant;
-  private String description;
+  private String description = "";
   private Double amount;
 
   @Column(name = "is_reviewed")
-  private Boolean isReviewed;
+  private Boolean isReviewed = false;
 
   @Column(name = "is_recurring")
-  private Boolean isRecurring;
+  private Boolean isRecurring = false;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "account_id")
-  private Account account;
+  @Column(name = "is_pending")
+  private Boolean isPending = false;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "category_id")
-  private Category category;
+  @Column(name = "account_id")
+  private String accountId;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id")
-  private User user;
+  @Column(name = "category_id")
+  private String categoryId;
+
+  @Column(name = "user_id")
+  private String userId;
 
   @CreatedDate
   @Column(name = "created_at")
@@ -51,4 +50,23 @@ public class Transaction {
   @LastModifiedDate
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  public Transaction(
+      String id,
+      LocalDateTime date,
+      String merchant,
+      Double amount,
+      Boolean isPending,
+      String accountId,
+      String categoryId,
+      String userId) {
+    this.id = id;
+    this.date = date;
+    this.merchant = merchant;
+    this.amount = amount;
+    this.isPending = isPending;
+    this.accountId = accountId;
+    this.categoryId = categoryId;
+    this.userId = userId;
+  }
 }

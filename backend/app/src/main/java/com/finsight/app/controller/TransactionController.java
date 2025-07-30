@@ -27,10 +27,10 @@ public class TransactionController {
   @GetMapping()
   public ResponseEntity<List<com.finsight.app.dto.Transaction>> getAccounts(
       HttpServletRequest request) throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactions(userId));
   }
 
@@ -38,10 +38,10 @@ public class TransactionController {
   public ResponseEntity<com.finsight.app.dto.Transaction> createTransaction(
       @Valid @RequestBody CreateTransaction transaction, HttpServletRequest request)
       throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     com.finsight.app.dto.Transaction transactionCreated =
         transactionService.createTransaction(transaction, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(transactionCreated);
@@ -53,10 +53,10 @@ public class TransactionController {
       @Valid @RequestBody UpdateTransactionRequest updateRequest,
       HttpServletRequest request)
       throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     com.finsight.app.dto.Transaction updatedTransaction =
         transactionService.updateTransaction(transactionId, updateRequest, userId);
     return ResponseEntity.ok(updatedTransaction);
@@ -65,10 +65,10 @@ public class TransactionController {
   @DeleteMapping("/{transactionId}")
   public ResponseEntity<Map<String, Object>> deleteTransaction(
       @PathVariable String transactionId, HttpServletRequest request) throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     transactionService.deleteTransaction(transactionId, userId);
 
     Map<String, Object> response = new HashMap<>();

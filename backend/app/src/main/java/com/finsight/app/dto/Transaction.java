@@ -2,7 +2,6 @@ package com.finsight.app.dto;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Transaction {
   private String id;
-  private Date date;
+  private LocalDateTime date;
   private String merchant;
   private String description;
   private Double amount;

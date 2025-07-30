@@ -19,8 +19,8 @@ public class UserService {
 
   @Autowired
   UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
-        this.userRepository = userRepository;
-      this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+    this.userRepository = userRepository;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
   }
 
   public com.finsight.app.dto.User register(User user) {

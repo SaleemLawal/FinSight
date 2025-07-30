@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
-import java.util.List;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -35,26 +34,6 @@ public class User {
   @NotBlank(message = "Password is required")
   @Size(min = 6, message = "Password must be at least 6 characters")
   private String password;
-
-  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  private List<Account> accounts;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PlaidAccessToken> plaidAccessTokens;
-
-  @OneToMany(
-      mappedBy = "user",
-      cascade = CascadeType.ALL,
-      fetch = FetchType.LAZY,
-      orphanRemoval = true)
-  private List<Category> categories;
-
-  @OneToMany(
-      mappedBy = "user",
-      cascade = CascadeType.ALL,
-      fetch = FetchType.LAZY,
-      orphanRemoval = true)
-  private List<Transaction> transactions;
 
   @CreatedDate
   @Column(name = "created_at")

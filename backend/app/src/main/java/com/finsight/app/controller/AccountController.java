@@ -27,20 +27,20 @@ public class AccountController {
   @GetMapping()
   public ResponseEntity<List<com.finsight.app.dto.Account>> getAccounts(HttpServletRequest request)
       throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
-      return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    return ResponseEntity.status(HttpStatus.OK).body(accountService.getAccounts(userId));
   }
 
   @PostMapping()
   public ResponseEntity<com.finsight.app.dto.Account> createAccount(
       @Valid @RequestBody Account account, HttpServletRequest request) throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     com.finsight.app.dto.Account accountCreated = accountService.createAccount(account, userId);
     return ResponseEntity.status(HttpStatus.CREATED).body(accountCreated);
   }
@@ -51,10 +51,10 @@ public class AccountController {
       @Valid @RequestBody UpdateAccountRequest updateRequest,
       HttpServletRequest request)
       throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
     com.finsight.app.dto.Account updatedAccount =
         accountService.updateAccount(accountId, updateRequest, userId);
     return ResponseEntity.ok(updatedAccount);
@@ -63,10 +63,10 @@ public class AccountController {
   @DeleteMapping("/{accountId}")
   public ResponseEntity<Map<String, Object>> deleteAccount(
       @PathVariable String accountId, HttpServletRequest request) throws Exception {
-      String userId = (String) request.getSession().getAttribute("userId");
-      if (userId == null) {
-          return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-      }
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
 
     accountService.deleteAccount(accountId, userId);
 

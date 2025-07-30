@@ -3,7 +3,6 @@ package com.finsight.app.service;
 import com.finsight.app.dto.UpdateCategoryRequest;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Category;
-import com.finsight.app.model.User;
 import com.finsight.app.repository.CategoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,19 +21,18 @@ public class CategoryService {
   }
 
   public List<com.finsight.app.dto.Category> getCategories(String userId) throws Exception {
-    User user = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
 
-    return categoryRepository.findAll().stream()
-        .filter(category -> category.getUser().getEmail().equals(user.getEmail()))
+    return categoryRepository.findByUserId(userId).stream()
         .map(this::transformToDto)
         .collect(Collectors.toList());
   }
 
   public com.finsight.app.dto.Category createCategory(Category category, String userId)
       throws Exception {
-    User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
 
-    category.setUser(loggedUser);
+    category.setUserId(userId);
 
     Category createdCategory = categoryRepository.save(category);
     return transformToDto(createdCategory);
@@ -42,14 +40,15 @@ public class CategoryService {
 
   public com.finsight.app.dto.Category updateCategory(
       String categoryId, UpdateCategoryRequest updateRequest, String userId) throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
+
     Category categoryToUpdate =
         categoryRepository
             .findById(categoryId)
-            .orElseThrow(() -> new RuntimeException("Account not found with id: " + categoryId));
+            .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
 
-    if (!categoryToUpdate.getUser().getId().equals(loggedUser.getId())) {
-      throw new UnauthorizedAccessException("You are not authorized to update this account");
+    if (!categoryToUpdate.getUserId().equals(userId)) {
+      throw new UnauthorizedAccessException("You are not authorized to update this category");
     }
 
     if (updateRequest.getColor() != null) {
@@ -67,13 +66,14 @@ public class CategoryService {
   }
 
   public void deleteCategory(String categoryId, String userId) throws Exception {
-    com.finsight.app.model.User loggedUser = userService.getCurrentUser(userId);
+    userService.getCurrentUser(userId);
+
     Category categoryToUpdate =
         categoryRepository
             .findById(categoryId)
-            .orElseThrow(() -> new RuntimeException("Account not found with id: " + categoryId));
-    if (!categoryToUpdate.getUser().getId().equals(loggedUser.getId())) {
-      throw new UnauthorizedAccessException("You are not authorized to update this account");
+            .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+    if (!categoryToUpdate.getUserId().equals(userId)) {
+      throw new UnauthorizedAccessException("You are not authorized to delete this category");
     }
     categoryRepository.deleteById(categoryId);
   }
@@ -85,6 +85,6 @@ public class CategoryService {
         category.getColor(),
         category.getIcon(),
         category.isDefault(),
-        category.getUser().getId());
+        category.getUserId());
   }
 }
