@@ -40,7 +40,7 @@ public class User {
   private List<Account> accounts;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PlaidItem> plaidItems;
+    private List<PlaidAccessToken> plaidAccessTokens;
 
   @OneToMany(
       mappedBy = "user",

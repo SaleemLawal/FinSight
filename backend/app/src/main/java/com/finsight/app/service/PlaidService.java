@@ -2,18 +2,18 @@ package com.finsight.app.service;
 
 import com.finsight.app.model.Account;
 import com.finsight.app.model.User;
+import com.finsight.app.repository.PlaidItemRepository;
 import com.plaid.client.model.*;
 import com.plaid.client.request.PlaidApi;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import retrofit2.Response;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import retrofit2.Response;
 
 @Service
 public class PlaidService {
@@ -88,23 +88,26 @@ public class PlaidService {
 
     public List<Account> getAccountFromAccessToken(String accessToken, User user) {
         try{
-            AccountsGetRequest request = new AccountsGetRequest().accessToken(accessToken);
-            Response<AccountsGetResponse> response = plaidApi.accountsGet(request).execute();
+            AccountsBalanceGetRequest request = new AccountsBalanceGetRequest().accessToken(accessToken);
+            Response<AccountsGetResponse> response = plaidApi.accountsBalanceGet(request).execute();
+
             if (!response.isSuccessful()) {
                 throw new RuntimeException("Failed to get accounts from Plaid");
             }
 
             assert response.body() != null;
             List<AccountBase> plaidAccounts = response.body().getAccounts();
+            String institutionId = response.body().getItem().getInstitutionId();
+            String institutionName = response.body().getItem().getInstitutionName();
 
-            return plaidAccounts.stream().map(account -> transformToAccount(account, user)).collect(Collectors.toList());
+            return plaidAccounts.stream().map(account -> transformToAccount(institutionId, institutionName, account, user)).collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Account transformToAccount(AccountBase plaidAccount, User user){
-        return new Account(plaidAccount.getName(), mapPlaidAccountType(plaidAccount.getType()),"TEST", plaidAccount.getMask(), plaidAccount.getBalances().getCurrent(), user);
+    public Account transformToAccount(String institutionId, String institutionName, AccountBase plaidAccount, User user){
+        return new Account(plaidAccount.getAccountId(), plaidAccount.getName(), mapPlaidAccountType(plaidAccount.getType()),institutionName, institutionId, plaidAccount.getMask(), plaidAccount.getBalances().getAvailable() == null ? plaidAccount.getBalances().getCurrent() : plaidAccount.getBalances().getAvailable(), user);
     }
 
     private com.finsight.app.util.AccountType mapPlaidAccountType(com.plaid.client.model.AccountType plaidType) {

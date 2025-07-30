@@ -12,20 +12,19 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class PlaidItem {
+public class PlaidAccessToken {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
     private String itemId;
     private String accessToken;
-//    private String institutionName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
-    public PlaidItem(String itemId, String accessToken, User loggedUser) {
+    public PlaidAccessToken(String itemId, String accessToken, User loggedUser) {
         this.itemId = itemId;
         this.accessToken = accessToken;
         this.user = loggedUser;

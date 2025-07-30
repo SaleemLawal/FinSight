@@ -19,18 +19,20 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Account {
-    public Account(String name, AccountType type, String institution, String last4, Double balance, User user) {
+    public Account(String id, String name, AccountType type, String institution_name, String institutionId, String lastFour, Double balance, User user) {
+        this.id = id;
         this.name = name;
         this.type = type;
-        this.institution = institution;
-        this.last4 = last4;
+        this.institution_name = institution_name;
+        this.institutionId = institutionId;
+        this.lastFour = lastFour;
         this.balance = balance;
         this.user = user;
         this.transactions = new ArrayList<>();
     }
 
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+//  @GeneratedValue(strategy = GenerationType.UUID)
   private String id;
 
   private String name;
@@ -38,8 +40,9 @@ public class Account {
   @Enumerated(EnumType.STRING)
   private AccountType type;
 
-  private String institution;
-  private String last4;
+  private String institution_name;
+  private String institutionId;
+  private String lastFour;
   private Double balance;
 
   @ManyToOne(fetch = FetchType.LAZY)

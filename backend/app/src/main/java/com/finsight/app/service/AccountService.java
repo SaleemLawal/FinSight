@@ -61,13 +61,13 @@ public class AccountService {
       accountToUpdate.setType(updateRequest.getType());
     }
     if (updateRequest.getInstitution() != null) {
-      accountToUpdate.setInstitution(updateRequest.getInstitution());
+      accountToUpdate.setInstitution_name(updateRequest.getInstitution());
     }
     if (updateRequest.getBalance() != null) {
       accountToUpdate.setBalance(updateRequest.getBalance());
     }
     if (updateRequest.getLast4() != null) {
-      accountToUpdate.setLast4(updateRequest.getLast4());
+      accountToUpdate.setLastFour(updateRequest.getLast4());
     }
     Account updatedAccount = accountRepository.save(accountToUpdate);
     return transformToDto(updatedAccount);
@@ -91,8 +91,9 @@ public class AccountService {
         account.getId(),
         account.getName(),
         account.getType(),
-        account.getInstitution(),
-        account.getLast4(),
+        account.getInstitution_name(),
+        account.getInstitutionId(),
+        account.getLastFour(),
         account.getBalance(),
         account.getUser().getId(),
         account.getCreatedAt());
