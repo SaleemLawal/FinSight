@@ -1,19 +1,20 @@
 package com.finsight.app.service;
 
 import com.finsight.app.model.Account;
+import com.finsight.app.model.AccountCursor;
 import com.finsight.app.model.PlaidAccessToken;
+import com.finsight.app.repository.AccountCursorRepository;
 import com.finsight.app.repository.PlaidAccessTokenRepository;
+import com.finsight.app.util.AccountType;
 import com.finsight.app.util.TransactionSyncResult;
 import com.plaid.client.model.*;
 import com.plaid.client.request.PlaidApi;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import retrofit2.Response;
 
@@ -24,17 +25,33 @@ public class PlaidService {
 
   private final PlaidApi plaidApi;
   private final PlaidAccessTokenRepository plaidAccessTokenRepository;
+  private final TransactionService transactionService;
+  private final AccountCursorRepository accountCursorRepository;
 
-  public PlaidService(PlaidApi plaidApi, PlaidAccessTokenRepository plaidAccessTokenRepository) {
+  @Autowired
+  public PlaidService(
+      PlaidApi plaidApi,
+      PlaidAccessTokenRepository plaidAccessTokenRepository,
+      TransactionService transactionService, AccountCursorRepository accountCursorRepository) {
     this.plaidApi = plaidApi;
     this.plaidAccessTokenRepository = plaidAccessTokenRepository;
+    this.transactionService = transactionService;
+      this.accountCursorRepository = accountCursorRepository;
   }
 
   public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
+
     LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser();
     user.setClientUserId(userId);
 
     LinkTokenCreateRequest request = new LinkTokenCreateRequest();
+
+      PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByUserId(userId);
+      if (plaidAccessToken != null){
+          logger.info("ACCESS TOKEN FOUND {}", plaidAccessToken.getAccessToken());
+
+          request.setAccessToken(plaidAccessToken.getAccessToken());
+      }
     request.setUser(user);
     request.setClientName("Finsight App");
     request.setProducts(List.of(Products.TRANSACTIONS));
@@ -44,33 +61,33 @@ public class PlaidService {
     return plaidApi.linkTokenCreate(request).execute();
   }
 
-  public LinkTokenGetResponse getPublicToken(String linkToken) throws IOException {
-    try {
-      logger.info("Getting details for public token");
-
-      LinkTokenGetRequest request = new LinkTokenGetRequest().linkToken(linkToken);
-      Response<LinkTokenGetResponse> response = plaidApi.linkTokenGet(request).execute();
-
-      if (response.isSuccessful()) {
-        assert response.body() != null;
-        logger.info("Successfully retrieved link token details");
-        return response.body();
-      } else {
-        String errorMsg = "Failed to get link token details. HTTP Code: " + response.code();
-        if (response.errorBody() != null) {
-          errorMsg += ", Error: " + response.errorBody().string();
-        }
-        logger.error(errorMsg);
-        throw new RuntimeException(errorMsg);
-      }
-    } catch (IOException e) {
-      logger.error("IO error getting link token details: ", e);
-      throw e;
-    } catch (Exception e) {
-      logger.error("Unexpected error getting link token details: ", e);
-      throw new RuntimeException("Unexpected error: " + e.getMessage());
-    }
-  }
+//  public LinkTokenGetResponse getPublicToken(String linkToken) throws IOException {
+//    try {
+//      logger.info("Getting details for public token");
+//
+//      LinkTokenGetRequest request = new LinkTokenGetRequest().linkToken(linkToken);
+//      Response<LinkTokenGetResponse> response = plaidApi.linkTokenGet(request).execute();
+//
+//      if (response.isSuccessful()) {
+//        assert response.body() != null;
+//        logger.info("Successfully retrieved link token details");
+//        return response.body();
+//      } else {
+//        String errorMsg = "Failed to get link token details. HTTP Code: " + response.code();
+//        if (response.errorBody() != null) {
+//          errorMsg += ", Error: " + response.errorBody().string();
+//        }
+//        logger.error(errorMsg);
+//        throw new RuntimeException(errorMsg);
+//      }
+//    } catch (IOException e) {
+//      logger.error("IO error getting link token details: ", e);
+//      throw e;
+//    } catch (Exception e) {
+//      logger.error("Unexpected error getting link token details: ", e);
+//      throw new RuntimeException("Unexpected error: " + e.getMessage());
+//    }
+//  }
 
   public Map<String, String> exchangePublicTokenForAccessToken(String publicToken)
       throws IOException {
@@ -115,17 +132,21 @@ public class PlaidService {
     }
   }
 
-  public TransactionSyncResult getTransactionsFromAccessToken(String accessToken, String userId)
-      throws IOException {
-    PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByAccessToken(accessToken);
-    String cursor = plaidAccessToken.getCursor();
-    List<Transaction> added = new ArrayList<Transaction>();
-    List<Transaction> modified = new ArrayList<Transaction>();
-    List<RemovedTransaction> removed = new ArrayList<RemovedTransaction>();
+    public void getTransactionsFromAccessToken(String accessToken, String userId, String accountId, AccountCursor accountCursor)
+        throws IOException {
+      PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByAccessToken(accessToken);
+      String cursor = accountCursor.getCursor();
+    List<Transaction> added = new ArrayList<>();
+    List<Transaction> modified = new ArrayList<>();
+    List<RemovedTransaction> removed = new ArrayList<>();
     boolean hasMore = true;
 
     TransactionsSyncRequestOptions options =
         new TransactionsSyncRequestOptions().includePersonalFinanceCategory(true);
+
+    if (accountId != null) {
+        options.accountId(accountId);
+    }
 
     while (hasMore) {
       TransactionsSyncRequest request =
@@ -142,7 +163,12 @@ public class PlaidService {
       cursor = response.getNextCursor();
     }
 
-    return new TransactionSyncResult(added, modified, removed, plaidAccessToken);
+        accountCursor.setCursor(cursor);
+        accountCursorRepository.save(accountCursor);
+    plaidAccessTokenRepository.save(plaidAccessToken);
+
+    transactionService.SyncTransactionsToDB(
+        new TransactionSyncResult(added, modified, removed), userId);
   }
 
   private Account transformToAccount(
@@ -160,13 +186,13 @@ public class PlaidService {
         user);
   }
 
-  private com.finsight.app.util.AccountType mapPlaidAccountType(
+  private AccountType mapPlaidAccountType(
       com.plaid.client.model.AccountType plaidType) {
     return switch (plaidType) {
-      case CREDIT -> com.finsight.app.util.AccountType.CREDIT;
-      case LOAN -> com.finsight.app.util.AccountType.LOAN;
-      case INVESTMENT -> com.finsight.app.util.AccountType.INVESTMENT;
-      default -> com.finsight.app.util.AccountType.DEPOSITORY;
+      case CREDIT -> AccountType.CREDIT;
+      case LOAN -> AccountType.LOAN;
+      case INVESTMENT -> AccountType.INVESTMENT;
+      default -> AccountType.DEPOSITORY;
     };
   }
 }

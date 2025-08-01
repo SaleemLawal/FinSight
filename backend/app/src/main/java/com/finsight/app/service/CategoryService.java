@@ -80,7 +80,7 @@ public class CategoryService {
 
   private com.finsight.app.dto.Category transformToDto(Category category) {
     return new com.finsight.app.dto.Category(
-        category.getId(),
+        category.getCategoryId(),
         category.getName(),
         category.getColor(),
         category.getIcon(),

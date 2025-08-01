@@ -8,9 +8,9 @@ import com.finsight.app.exception.TransactionNotFoundException;
 import com.finsight.app.exception.UnauthorizedAccessException;
 import com.finsight.app.model.Account;
 import com.finsight.app.model.Category;
-import com.finsight.app.model.PlaidAccessToken;
 import com.finsight.app.repository.AccountRepository;
 import com.finsight.app.repository.CategoryRepository;
+import com.finsight.app.repository.PlaidAccessTokenRepository;
 import com.finsight.app.repository.TransactionRepository;
 import com.finsight.app.util.TransactionSyncResult;
 import com.plaid.client.model.Transaction;
@@ -26,17 +26,19 @@ public class TransactionService {
   private final UserService userService;
   private final CategoryRepository categoryRepository;
   private final AccountRepository accountRepository;
+  private final PlaidAccessTokenRepository plaidAccessTokenRepository;
 
   @Autowired
   TransactionService(
       TransactionRepository transactionRepository,
       UserService userService,
       CategoryRepository categoryRepository,
-      AccountRepository accountRepository) {
+      AccountRepository accountRepository, PlaidAccessTokenRepository plaidAccessTokenRepository) {
     this.transactionRepository = transactionRepository;
     this.userService = userService;
     this.categoryRepository = categoryRepository;
     this.accountRepository = accountRepository;
+      this.plaidAccessTokenRepository = plaidAccessTokenRepository;
   }
 
   public com.finsight.app.dto.Transaction createTransaction(
@@ -152,23 +154,28 @@ public class TransactionService {
     transactionRepository.deleteById(transactionId);
   }
 
-  private void SyncTransactionsToDB(TransactionSyncResult transactionSyncResult) {
-    //      List<Transaction> added = transactionSyncResult.getAdded();
-    List<Transaction> modified = transactionSyncResult.getModified();
-    List<com.plaid.client.model.RemovedTransaction> removed = transactionSyncResult.getRemoved();
-    PlaidAccessToken plaidAccessToken = transactionSyncResult.getPlaidAccessToken();
+  public void SyncTransactionsToDB(TransactionSyncResult transactionSyncResult, String userId) {
+//    PlaidAccessToken plaidAccessToken = transactionSyncResult.getPlaidAccessToken();
 
     for (Transaction txn : transactionSyncResult.getAdded()) {
       if (!transactionRepository.existsById(txn.getTransactionId())) {
-        //              transactionRepository.save();
+        transactionRepository.save(toEntity(txn, userId));
       }
+    }
+
+    for (Transaction txn : transactionSyncResult.getModified()) {
+      transactionRepository.save(toEntity(txn, userId));
+    }
+
+    for (com.plaid.client.model.RemovedTransaction txn : transactionSyncResult.getRemoved()) {
+      transactionRepository.deleteById(txn.getTransactionId());
     }
   }
 
   private com.finsight.app.dto.Transaction transformToDto(
       com.finsight.app.model.Transaction transaction) {
     return new com.finsight.app.dto.Transaction(
-        transaction.getId(),
+        transaction.getTransactionId(),
         transaction.getDate(),
         transaction.getMerchant(),
         transaction.getDescription(),

@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Account {
   @Id
   //  @GeneratedValue(strategy = GenerationType.UUID)
-  private String id;
+  private String accountId;
 
   private String name;
 
@@ -43,7 +43,7 @@ public class Account {
   private LocalDateTime updatedAt;
 
   public Account(
-      String id,
+      String accountId,
       String name,
       AccountType type,
       String institution_name,
@@ -51,7 +51,7 @@ public class Account {
       String lastFour,
       Double balance,
       String userId) {
-    this.id = id;
+    this.accountId = accountId;
     this.name = name;
     this.type = type;
     this.institution_name = institution_name;

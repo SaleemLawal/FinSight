@@ -89,7 +89,7 @@ public class AccountService {
 
   public com.finsight.app.dto.Account transformToDto(Account account) {
     return new com.finsight.app.dto.Account(
-        account.getId(),
+        account.getAccountId(),
         account.getName(),
         account.getType(),
         account.getInstitution_name(),

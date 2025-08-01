@@ -19,7 +19,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Category {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
-  private String id;
+  private String categoryId;
 
   @NotNull private String name;
   @NotNull private String color;

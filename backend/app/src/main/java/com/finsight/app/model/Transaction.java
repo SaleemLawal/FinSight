@@ -18,7 +18,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 public class Transaction {
   @Id
   //  @GeneratedValue(strategy = GenerationType.UUID)
-  private String id;
+  private String transactionId;
 
   private LocalDateTime date;
   private String merchant;
@@ -52,7 +52,7 @@ public class Transaction {
   private LocalDateTime updatedAt;
 
   public Transaction(
-      String id,
+      String transactionId,
       LocalDateTime date,
       String merchant,
       Double amount,
@@ -60,7 +60,7 @@ public class Transaction {
       String accountId,
       String categoryId,
       String userId) {
-    this.id = id;
+    this.transactionId = transactionId;
     this.date = date;
     this.merchant = merchant;
     this.amount = amount;

@@ -1,6 +1,6 @@
 import AssetsVsDebt from '~/components/graphs/AssetsVsDebt';
 import MonthlySpending from '~/components/graphs/monthlySpending';
-import type { Route } from './+types/home';
+import type { Route } from './+types/dashboard';
 
 export function meta({}: Route.MetaArgs) {
   return [{ title: 'FinSight' }, { name: 'description', content: 'FinSight' }];

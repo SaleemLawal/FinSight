@@ -30,10 +30,10 @@ public class UserService {
     return transformToDto(createdUser);
   }
 
-  public com.finsight.app.model.User getCurrentUser(@NotNull String id) {
+  public void getCurrentUser(@NotNull String id) {
     Optional<User> user = userRepository.findById(id);
     if (user.isPresent()) {
-      return user.get();
+      return;
     }
     throw new UserNotFoundException("User not found");
   }
