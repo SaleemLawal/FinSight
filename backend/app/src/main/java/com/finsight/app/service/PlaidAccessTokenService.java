@@ -1,14 +1,12 @@
 package com.finsight.app.service;
 
 import com.finsight.app.model.Account;
-import com.finsight.app.model.AccountCursor;
 import com.finsight.app.model.PlaidAccessToken;
 import com.finsight.app.repository.AccountCursorRepository;
 import com.finsight.app.repository.AccountRepository;
 import com.finsight.app.repository.PlaidAccessTokenRepository;
 import jakarta.transaction.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,12 +40,12 @@ public class PlaidAccessTokenService {
   }
 
   @Transactional
-  public void createPlaidItem(String userId, String accessToken, String itemId) {
+  public void createPlaidItem(String userId, String accessToken, String itemId, String institutionName) {
     if (userId == null || accessToken == null || itemId == null) {
       throw new IllegalArgumentException("Required parameters cannot be null");
     }
     userService.getCurrentUser(userId);
-    PlaidAccessToken plaidAccessToken = new PlaidAccessToken(itemId, accessToken, userId);
+    PlaidAccessToken plaidAccessToken = new PlaidAccessToken(itemId, accessToken, institutionName, userId);
 
     plaidAccessTokenRepository.save(plaidAccessToken);
 

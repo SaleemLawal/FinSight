@@ -87,7 +87,14 @@ export function AppSidebar() {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild className={isActive ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground' : ''}>
+                    <SidebarMenuButton
+                      asChild
+                      className={
+                        isActive
+                          ? 'bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground'
+                          : ''
+                      }
+                    >
                       <Link to={item.url}>
                         <item.icon />
                         <span>{item.title}</span>

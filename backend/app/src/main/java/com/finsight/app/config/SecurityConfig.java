@@ -42,6 +42,7 @@ public class SecurityConfig {
                     // "/v3/api-docs/**").permitAll()
                     .anyRequest()
                     .permitAll())
+        .headers(headers -> headers.frameOptions().disable())
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable);
 

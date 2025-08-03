@@ -18,6 +18,7 @@ public class PlaidAccessToken {
   private String itemId;
 
   private String accessToken;
+  private String institutionName;
 
   @Column(name = "user_id")
   private String userId;

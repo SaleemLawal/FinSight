@@ -41,24 +41,32 @@ public class PlaidService {
 
   public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
 
-    LinkTokenCreateRequestUser user = new LinkTokenCreateRequestUser();
-    user.setClientUserId(userId);
-
-    LinkTokenCreateRequest request = new LinkTokenCreateRequest();
-
-      PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByUserId(userId);
-      if (plaidAccessToken != null){
-          logger.info("ACCESS TOKEN FOUND {}", plaidAccessToken.getAccessToken());
-
-          request.setAccessToken(plaidAccessToken.getAccessToken());
-      }
-    request.setUser(user);
-    request.setClientName("Finsight App");
-    request.setProducts(List.of(Products.TRANSACTIONS));
-    request.setLanguage("en");
-    request.setCountryCodes(List.of(CountryCode.US));
+    LinkTokenCreateRequest request = new LinkTokenCreateRequest()
+        .user(new LinkTokenCreateRequestUser().clientUserId(userId))
+        .clientName("FinSight App")
+        .countryCodes(List.of(CountryCode.US))
+        .language("en")
+        .products(List.of(Products.TRANSACTIONS));
 
     return plaidApi.linkTokenCreate(request).execute();
+  }
+  
+  // update-existing flow
+  public Response<LinkTokenCreateResponse> createUpdateLinkToken(String userId, String itemId) throws IOException {
+    PlaidAccessToken tok = plaidAccessTokenRepository.findById(itemId)
+        .orElseThrow(() -> new RuntimeException("Item not found"));
+
+    LinkTokenCreateRequest req = new LinkTokenCreateRequest()
+        .user(new LinkTokenCreateRequestUser().clientUserId(userId))
+        .clientName("FinSight App")
+        .countryCodes(List.of(CountryCode.US))
+        .language("en")
+        .accessToken(tok.getAccessToken())
+        .update(new LinkTokenCreateRequestUpdate()
+            .accountSelectionEnabled(true)
+            .reauthorizationEnabled(true));
+
+    return plaidApi.linkTokenCreate(req).execute();
   }
 
 //  public LinkTokenGetResponse getPublicToken(String linkToken) throws IOException {
@@ -88,6 +96,12 @@ public class PlaidService {
 //      throw new RuntimeException("Unexpected error: " + e.getMessage());
 //    }
 //  }
+
+  public String getInstitutionName(String accessToken) throws IOException {
+    ItemGetRequest request = new ItemGetRequest().accessToken(accessToken);
+    Response<ItemGetResponse> response = plaidApi.itemGet(request).execute();
+    return response.body().getItem().getInstitutionName();
+  }
 
   public Map<String, String> exchangePublicTokenForAccessToken(String publicToken)
       throws IOException {
