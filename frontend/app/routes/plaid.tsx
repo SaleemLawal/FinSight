@@ -16,6 +16,7 @@ export default function Plaid() {
   const [items, setItems] = useState<
     { institutionName: string; itemId: string }[]
   >([]);
+  const [mode, setMode] = useState<'create' | 'update'>('create');
 
   useEffect(() => {
     const loadItems = async () => {
@@ -58,6 +59,7 @@ export default function Plaid() {
   };
 
   const createToken = async (mode: 'create' | 'update', itemId?: string) => {
+    setMode(mode);
     const body = mode === 'create' ? { mode } : { mode, itemId };
     const { data } = await axios.post(
       'http://localhost:8080/api/plaid/create-token',
@@ -83,6 +85,7 @@ export default function Plaid() {
           `http://localhost:8080/api/plaid/exchange-token`,
           {
             public_token,
+            mode,
           },
           { withCredentials: true }
         );
@@ -117,6 +120,7 @@ export default function Plaid() {
   };
 
   const handleUpdateAccount = async (itemId: string) => {
+    console.log('handleUpdateAccount', itemId);
     const authSuccess = await checkAuthentication();
     if (authSuccess && !linkToken) {
       await createToken('update', itemId);

@@ -56,17 +56,31 @@ public class PlaidController {
       @RequestBody Map<String, String> body, HttpServletRequest request) throws IOException {
     String userId = (String) request.getSession().getAttribute("userId");
     String publicToken = body.get("public_token");
+    String mode = body.get("mode");
     Map<String, String> response = plaidService.exchangePublicTokenForAccessToken(publicToken);
-
     // Get institution name from Plaid API
     String institutionName = plaidService.getInstitutionName(response.get("accessToken"));
 
-    plaidAccessTokenService.createPlaidItem(
-        userId, response.get("accessToken"), response.get("itemId"), institutionName);
-
-    return ResponseEntity.ok(Map.of(
-        "itemId", response.get("itemId"),
-        "institutionName", institutionName));
+    try {
+      if ("create".equals(mode)) {
+        plaidAccessTokenService.createPlaidItem(
+            userId, response.get("accessToken"), response.get("itemId"), institutionName);
+      } else if ("update".equals(mode)) {
+        plaidAccessTokenService.updatePlaidItem(
+            userId, response.get("accessToken"), response.get("itemId"), institutionName);
+      }
+      return ResponseEntity.ok(Map.of(
+          "itemId", response.get("itemId"),
+          "institutionName", institutionName));
+    } catch (RuntimeException e) {
+      if (e.getMessage().contains("already have an account connected")) {
+        return ResponseEntity.badRequest().body(Map.of(
+            "error", "DUPLICATE_INSTITUTION",
+            "message", e.getMessage(),
+            "institutionName", institutionName));
+      }
+      throw e;
+    }
   }
 
   @GetMapping("/items")
@@ -79,5 +93,4 @@ public class PlaidController {
         .collect(Collectors.toList());
     return ResponseEntity.ok(items);
   }
-
 }

@@ -40,7 +40,7 @@ public class PlaidService {
   }
 
   public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
-
+    
     LinkTokenCreateRequest request = new LinkTokenCreateRequest()
         .user(new LinkTokenCreateRequestUser().clientUserId(userId))
         .clientName("FinSight App")
