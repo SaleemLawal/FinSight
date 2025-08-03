@@ -36,7 +36,7 @@ public class PlaidService {
     this.plaidApi = plaidApi;
     this.plaidAccessTokenRepository = plaidAccessTokenRepository;
     this.transactionService = transactionService;
-      this.accountCursorRepository = accountCursorRepository;
+    this.accountCursorRepository = accountCursorRepository;
   }
 
   public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
@@ -50,7 +50,7 @@ public class PlaidService {
 
     return plaidApi.linkTokenCreate(request).execute();
   }
-  
+
   // update-existing flow
   public Response<LinkTokenCreateResponse> createUpdateLinkToken(String userId, String itemId) throws IOException {
     PlaidAccessToken tok = plaidAccessTokenRepository.findById(itemId)
@@ -69,52 +69,63 @@ public class PlaidService {
     return plaidApi.linkTokenCreate(req).execute();
   }
 
-//  public LinkTokenGetResponse getPublicToken(String linkToken) throws IOException {
-//    try {
-//      logger.info("Getting details for public token");
-//
-//      LinkTokenGetRequest request = new LinkTokenGetRequest().linkToken(linkToken);
-//      Response<LinkTokenGetResponse> response = plaidApi.linkTokenGet(request).execute();
-//
-//      if (response.isSuccessful()) {
-//        assert response.body() != null;
-//        logger.info("Successfully retrieved link token details");
-//        return response.body();
-//      } else {
-//        String errorMsg = "Failed to get link token details. HTTP Code: " + response.code();
-//        if (response.errorBody() != null) {
-//          errorMsg += ", Error: " + response.errorBody().string();
-//        }
-//        logger.error(errorMsg);
-//        throw new RuntimeException(errorMsg);
-//      }
-//    } catch (IOException e) {
-//      logger.error("IO error getting link token details: ", e);
-//      throw e;
-//    } catch (Exception e) {
-//      logger.error("Unexpected error getting link token details: ", e);
-//      throw new RuntimeException("Unexpected error: " + e.getMessage());
-//    }
-//  }
+  // public LinkTokenGetResponse getPublicToken(String linkToken) throws
+  // IOException {
+  // try {
+  // logger.info("Getting details for public token");
+  //
+  // LinkTokenGetRequest request = new LinkTokenGetRequest().linkToken(linkToken);
+  // Response<LinkTokenGetResponse> response =
+  // plaidApi.linkTokenGet(request).execute();
+  //
+  // if (response.isSuccessful()) {
+  // assert response.body() != null;
+  // logger.info("Successfully retrieved link token details");
+  // return response.body();
+  // } else {
+  // String errorMsg = "Failed to get link token details. HTTP Code: " +
+  // response.code();
+  // if (response.errorBody() != null) {
+  // errorMsg += ", Error: " + response.errorBody().string();
+  // }
+  // logger.error(errorMsg);
+  // throw new RuntimeException(errorMsg);
+  // }
+  // } catch (IOException e) {
+  // logger.error("IO error getting link token details: ", e);
+  // throw e;
+  // } catch (Exception e) {
+  // logger.error("Unexpected error getting link token details: ", e);
+  // throw new RuntimeException("Unexpected error: " + e.getMessage());
+  // }
+  // }
 
   public String getInstitutionName(String accessToken) throws IOException {
     ItemGetRequest request = new ItemGetRequest().accessToken(accessToken);
     Response<ItemGetResponse> response = plaidApi.itemGet(request).execute();
-    return response.body().getItem().getInstitutionName();
+    ItemGetResponse body = response.body();
+
+    if (body == null || body.getItem() == null) {
+      throw new RuntimeException("Invalid response from Plaid API");
+    }
+
+    return body.getItem().getInstitutionName();
   }
 
   public Map<String, String> exchangePublicTokenForAccessToken(String publicToken)
       throws IOException {
     try {
-      ItemPublicTokenExchangeRequest request =
-          new ItemPublicTokenExchangeRequest().publicToken(publicToken);
-      Response<ItemPublicTokenExchangeResponse> response =
-          plaidApi.itemPublicTokenExchange(request).execute();
-      assert response.body() != null;
+      ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest().publicToken(publicToken);
+      Response<ItemPublicTokenExchangeResponse> response = plaidApi.itemPublicTokenExchange(request).execute();
+      ItemPublicTokenExchangeResponse body = response.body();
+
+      if (body == null || body.getAccessToken() == null || body.getItemId() == null) {
+        throw new RuntimeException("Invalid response from Plaid API");
+      }
 
       Map<String, String> res = new HashMap<>();
-      res.put("accessToken", response.body().getAccessToken());
-      res.put("itemId", response.body().getItemId());
+      res.put("accessToken", body.getAccessToken());
+      res.put("itemId", body.getItemId());
       return res;
     } catch (IOException e) {
       logger.error("IO error getting link token details: ", e);
@@ -133,10 +144,15 @@ public class PlaidService {
         throw new RuntimeException("Failed to get accounts from Plaid");
       }
 
-      assert response.body() != null;
-      List<AccountBase> plaidAccounts = response.body().getAccounts();
-      String institutionId = response.body().getItem().getInstitutionId();
-      String institutionName = response.body().getItem().getInstitutionName();
+      AccountsGetResponse body = response.body();
+
+      if (body == null || body.getAccounts() == null || body.getItem() == null) {
+        throw new RuntimeException("Invalid response from Plaid API");
+      }
+
+      List<AccountBase> plaidAccounts = body.getAccounts();
+      String institutionId = body.getItem().getInstitutionId();
+      String institutionName = body.getItem().getInstitutionName();
 
       return plaidAccounts.stream()
           .map(account -> transformToAccount(institutionId, institutionName, account, userId))
@@ -146,29 +162,32 @@ public class PlaidService {
     }
   }
 
-    public void getTransactionsFromAccessToken(String accessToken, String userId, String accountId, AccountCursor accountCursor)
-        throws IOException {
-      PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByAccessToken(accessToken);
-      String cursor = accountCursor.getCursor();
+  public void getTransactionsFromAccessToken(String accessToken, String userId, String accountId,
+      AccountCursor accountCursor)
+      throws IOException {
+    PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByAccessToken(accessToken);
+    String cursor = accountCursor.getCursor();
     List<Transaction> added = new ArrayList<>();
     List<Transaction> modified = new ArrayList<>();
     List<RemovedTransaction> removed = new ArrayList<>();
     boolean hasMore = true;
 
-    TransactionsSyncRequestOptions options =
-        new TransactionsSyncRequestOptions().includePersonalFinanceCategory(true);
+    TransactionsSyncRequestOptions options = new TransactionsSyncRequestOptions().includePersonalFinanceCategory(true);
 
     if (accountId != null) {
-        options.accountId(accountId);
+      options.accountId(accountId);
     }
 
     while (hasMore) {
-      TransactionsSyncRequest request =
-          new TransactionsSyncRequest().accessToken(accessToken).cursor(cursor).options(options);
+      TransactionsSyncRequest request = new TransactionsSyncRequest().accessToken(accessToken).cursor(cursor)
+          .options(options);
 
       TransactionsSyncResponse response = plaidApi.transactionsSync(request).execute().body();
 
-      assert response != null;
+      if (response == null) {
+        throw new RuntimeException("Invalid response from Plaid API");
+      }
+
       added.addAll(response.getAdded());
       modified.addAll(response.getModified());
       removed.addAll(response.getRemoved());
@@ -177,8 +196,8 @@ public class PlaidService {
       cursor = response.getNextCursor();
     }
 
-        accountCursor.setCursor(cursor);
-        accountCursorRepository.save(accountCursor);
+    accountCursor.setCursor(cursor);
+    accountCursorRepository.save(accountCursor);
     plaidAccessTokenRepository.save(plaidAccessToken);
 
     transactionService.SyncTransactionsToDB(

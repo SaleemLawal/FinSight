@@ -1,6 +1,5 @@
 package com.finsight.app.dto;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Data;

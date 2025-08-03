@@ -43,7 +43,12 @@ public class PlaidController {
         ? plaidService.createUpdateLinkToken(userId, itemId)
         : plaidService.createLinkToken(userId);
 
-    return Map.of("link_token", response.body().getLinkToken());
+    LinkTokenCreateResponse res = response.body();
+    if (res == null) {
+      throw new RuntimeException("Failed to create link token");
+    }
+
+    return Map.of("link_token", res.getLinkToken());
   }
 
   @PostMapping("/exchange-token")
@@ -70,10 +75,9 @@ public class PlaidController {
     List<Map<String, String>> items = plaidAccessTokenRepository.findByUserId(userId).stream()
         .map(token -> Map.of(
             "itemId", token.getItemId(),
-            "institutionName", token.getInstitutionName()
-        ))
+            "institutionName", token.getInstitutionName()))
         .collect(Collectors.toList());
     return ResponseEntity.ok(items);
   }
-  
+
 }
