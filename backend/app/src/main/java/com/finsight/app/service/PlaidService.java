@@ -32,7 +32,8 @@ public class PlaidService {
   public PlaidService(
       PlaidApi plaidApi,
       PlaidAccessTokenRepository plaidAccessTokenRepository,
-      TransactionService transactionService, AccountCursorRepository accountCursorRepository) {
+      TransactionService transactionService,
+      AccountCursorRepository accountCursorRepository) {
     this.plaidApi = plaidApi;
     this.plaidAccessTokenRepository = plaidAccessTokenRepository;
     this.transactionService = transactionService;
@@ -40,31 +41,37 @@ public class PlaidService {
   }
 
   public Response<LinkTokenCreateResponse> createLinkToken(String userId) throws IOException {
-    
-    LinkTokenCreateRequest request = new LinkTokenCreateRequest()
-        .user(new LinkTokenCreateRequestUser().clientUserId(userId))
-        .clientName("FinSight App")
-        .countryCodes(List.of(CountryCode.US))
-        .language("en")
-        .products(List.of(Products.TRANSACTIONS));
+
+    LinkTokenCreateRequest request =
+        new LinkTokenCreateRequest()
+            .user(new LinkTokenCreateRequestUser().clientUserId(userId))
+            .clientName("FinSight App")
+            .countryCodes(List.of(CountryCode.US))
+            .language("en")
+            .products(List.of(Products.TRANSACTIONS));
 
     return plaidApi.linkTokenCreate(request).execute();
   }
 
   // update-existing flow
-  public Response<LinkTokenCreateResponse> createUpdateLinkToken(String userId, String itemId) throws IOException {
-    PlaidAccessToken tok = plaidAccessTokenRepository.findById(itemId)
-        .orElseThrow(() -> new RuntimeException("Item not found"));
+  public Response<LinkTokenCreateResponse> createUpdateLinkToken(String userId, String itemId)
+      throws IOException {
+    PlaidAccessToken tok =
+        plaidAccessTokenRepository
+            .findById(itemId)
+            .orElseThrow(() -> new RuntimeException("Item not found"));
 
-    LinkTokenCreateRequest req = new LinkTokenCreateRequest()
-        .user(new LinkTokenCreateRequestUser().clientUserId(userId))
-        .clientName("FinSight App")
-        .countryCodes(List.of(CountryCode.US))
-        .language("en")
-        .accessToken(tok.getAccessToken())
-        .update(new LinkTokenCreateRequestUpdate()
-            .accountSelectionEnabled(true)
-            .reauthorizationEnabled(true));
+    LinkTokenCreateRequest req =
+        new LinkTokenCreateRequest()
+            .user(new LinkTokenCreateRequestUser().clientUserId(userId))
+            .clientName("FinSight App")
+            .countryCodes(List.of(CountryCode.US))
+            .language("en")
+            .accessToken(tok.getAccessToken())
+            .update(
+                new LinkTokenCreateRequestUpdate()
+                    .accountSelectionEnabled(true)
+                    .reauthorizationEnabled(true));
 
     return plaidApi.linkTokenCreate(req).execute();
   }
@@ -115,8 +122,10 @@ public class PlaidService {
   public Map<String, String> exchangePublicTokenForAccessToken(String publicToken)
       throws IOException {
     try {
-      ItemPublicTokenExchangeRequest request = new ItemPublicTokenExchangeRequest().publicToken(publicToken);
-      Response<ItemPublicTokenExchangeResponse> response = plaidApi.itemPublicTokenExchange(request).execute();
+      ItemPublicTokenExchangeRequest request =
+          new ItemPublicTokenExchangeRequest().publicToken(publicToken);
+      Response<ItemPublicTokenExchangeResponse> response =
+          plaidApi.itemPublicTokenExchange(request).execute();
       ItemPublicTokenExchangeResponse body = response.body();
 
       if (body == null || body.getAccessToken() == null || body.getItemId() == null) {
@@ -162,8 +171,8 @@ public class PlaidService {
     }
   }
 
-  public void getTransactionsFromAccessToken(String accessToken, String userId, String accountId,
-      AccountCursor accountCursor)
+  public void getTransactionsFromAccessToken(
+      String accessToken, String userId, String accountId, AccountCursor accountCursor)
       throws IOException {
     PlaidAccessToken plaidAccessToken = plaidAccessTokenRepository.findByAccessToken(accessToken);
     String cursor = accountCursor.getCursor();
@@ -172,15 +181,16 @@ public class PlaidService {
     List<RemovedTransaction> removed = new ArrayList<>();
     boolean hasMore = true;
 
-    TransactionsSyncRequestOptions options = new TransactionsSyncRequestOptions().includePersonalFinanceCategory(true);
+    TransactionsSyncRequestOptions options =
+        new TransactionsSyncRequestOptions().includePersonalFinanceCategory(true);
 
     if (accountId != null) {
       options.accountId(accountId);
     }
 
     while (hasMore) {
-      TransactionsSyncRequest request = new TransactionsSyncRequest().accessToken(accessToken).cursor(cursor)
-          .options(options);
+      TransactionsSyncRequest request =
+          new TransactionsSyncRequest().accessToken(accessToken).cursor(cursor).options(options);
 
       TransactionsSyncResponse response = plaidApi.transactionsSync(request).execute().body();
 
@@ -219,8 +229,7 @@ public class PlaidService {
         user);
   }
 
-  private AccountType mapPlaidAccountType(
-      com.plaid.client.model.AccountType plaidType) {
+  private AccountType mapPlaidAccountType(com.plaid.client.model.AccountType plaidType) {
     return switch (plaidType) {
       case CREDIT -> AccountType.CREDIT;
       case LOAN -> AccountType.LOAN;

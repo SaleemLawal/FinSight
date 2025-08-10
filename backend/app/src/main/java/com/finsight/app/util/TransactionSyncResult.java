@@ -12,5 +12,5 @@ public class TransactionSyncResult {
   private List<Transaction> added;
   private List<Transaction> modified;
   private List<RemovedTransaction> removed;
-//  private PlaidAccessToken plaidAccessToken;
+  //  private PlaidAccessToken plaidAccessToken;
 }

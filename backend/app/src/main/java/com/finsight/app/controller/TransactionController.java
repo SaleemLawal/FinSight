@@ -15,7 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/users/transactions")
+@RequestMapping("/api/user/transactions")
 public class TransactionController {
   private final TransactionService transactionService;
 
@@ -25,13 +25,24 @@ public class TransactionController {
   }
 
   @GetMapping()
-  public ResponseEntity<List<com.finsight.app.dto.Transaction>> getAccounts(
+  public ResponseEntity<List<com.finsight.app.dto.Transaction>> getTransactions(
       HttpServletRequest request) throws Exception {
     String userId = (String) request.getSession().getAttribute("userId");
     if (userId == null) {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
     return ResponseEntity.status(HttpStatus.OK).body(transactionService.getTransactions(userId));
+  }
+
+  @GetMapping("/{accountId}")
+  public ResponseEntity<List<com.finsight.app.dto.Transaction>> getTransactionByAccountId(
+      HttpServletRequest request, @PathVariable String accountId) throws Exception {
+    String userId = (String) request.getSession().getAttribute("userId");
+    if (userId == null) {
+      return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(transactionService.getTransactionByAccountId(accountId));
   }
 
   @PostMapping()

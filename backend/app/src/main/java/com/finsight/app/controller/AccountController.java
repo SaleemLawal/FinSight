@@ -1,11 +1,13 @@
 package com.finsight.app.controller;
 
+import com.finsight.app.dto.BalanceSeriesResponse;
 import com.finsight.app.dto.UpdateAccountRequest;
 import com.finsight.app.model.Account;
 import com.finsight.app.service.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,9 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
-@RequestMapping("/users/accounts")
+@RequestMapping("/api/user/accounts")
 public class AccountController {
   private final AccountService accountService;
 
@@ -76,5 +79,25 @@ public class AccountController {
     response.put("message", "Account with id " + accountId + " deleted successfully");
 
     return ResponseEntity.ok(response);
+  }
+
+  @GetMapping("/{accountId}/balance-series")
+  public ResponseEntity<BalanceSeriesResponse> getBalanceSeries(
+          @PathVariable String accountId,
+          @RequestParam(defaultValue = "1M") String range,
+          @RequestParam(defaultValue = "day") String granularity) {
+
+      // Validate range parameter
+      if (!Arrays.asList("1W", "1M", "3M", "YTD", "1Y", "ALL").contains(range.toUpperCase())) {
+          throw new IllegalArgumentException("Invalid range. Must be one of: 1W, 1M, 3M, YTD, 1Y, ALL");
+      }
+
+      // Validate granularity parameter
+      if (!Arrays.asList("day", "week", "month").contains(granularity.toLowerCase())) {
+          throw new IllegalArgumentException("Invalid granularity. Must be one of: day, week, month");
+      }
+
+      BalanceSeriesResponse response = accountService.getBalanceSeries(accountId, range, granularity);
+      return ResponseEntity.ok(response);
   }
 }

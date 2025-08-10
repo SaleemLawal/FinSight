@@ -14,7 +14,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @AllArgsConstructor
 public class PlaidAccessToken {
   @Id
-//  @GeneratedValue(strategy = GenerationType.UUID)
+  //  @GeneratedValue(strategy = GenerationType.UUID)
   private String itemId;
 
   private String accessToken;
@@ -22,5 +22,4 @@ public class PlaidAccessToken {
 
   @Column(name = "user_id")
   private String userId;
-
 }

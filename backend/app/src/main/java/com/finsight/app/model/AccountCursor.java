@@ -11,15 +11,14 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccountCursor {
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private String id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.UUID)
+  private String id;
 
-    private String userId;
-    private String itemId;
-    private String accountId;
-    private String lastFour;
-    private String institutionId;
-    private String cursor;
+  private String userId;
+  private String itemId;
+  private String accountId;
+  private String lastFour;
+  private String institutionId;
+  private String cursor;
 }
-

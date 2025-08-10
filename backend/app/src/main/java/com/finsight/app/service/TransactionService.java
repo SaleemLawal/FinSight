@@ -33,12 +33,13 @@ public class TransactionService {
       TransactionRepository transactionRepository,
       UserService userService,
       CategoryRepository categoryRepository,
-      AccountRepository accountRepository, PlaidAccessTokenRepository plaidAccessTokenRepository) {
+      AccountRepository accountRepository,
+      PlaidAccessTokenRepository plaidAccessTokenRepository) {
     this.transactionRepository = transactionRepository;
     this.userService = userService;
     this.categoryRepository = categoryRepository;
     this.accountRepository = accountRepository;
-      this.plaidAccessTokenRepository = plaidAccessTokenRepository;
+    this.plaidAccessTokenRepository = plaidAccessTokenRepository;
   }
 
   public com.finsight.app.dto.Transaction createTransaction(
@@ -81,6 +82,13 @@ public class TransactionService {
     userService.getCurrentUser(userId);
 
     return transactionRepository.findByUserId(userId).stream()
+        .map(this::transformToDto)
+        .collect(Collectors.toList());
+  }
+
+  public List<com.finsight.app.dto.Transaction> getTransactionByAccountId(String accountId)
+      throws Exception {
+    return transactionRepository.findByAccountId(accountId).stream()
         .map(this::transformToDto)
         .collect(Collectors.toList());
   }
@@ -155,7 +163,7 @@ public class TransactionService {
   }
 
   public void SyncTransactionsToDB(TransactionSyncResult transactionSyncResult, String userId) {
-//    PlaidAccessToken plaidAccessToken = transactionSyncResult.getPlaidAccessToken();
+    //    PlaidAccessToken plaidAccessToken = transactionSyncResult.getPlaidAccessToken();
 
     for (Transaction txn : transactionSyncResult.getAdded()) {
       if (!transactionRepository.existsById(txn.getTransactionId())) {
