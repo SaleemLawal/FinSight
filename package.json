@@ -1,0 +1,26 @@
+{
+  "name": "finsight",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SaleemLawal/FinSight.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/SaleemLawal/FinSight/issues"
+  },
+  "homepage": "https://github.com/SaleemLawal/FinSight#readme",
+  "devDependencies": {
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2"
+  }
+}

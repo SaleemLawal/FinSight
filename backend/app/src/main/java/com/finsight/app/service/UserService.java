@@ -1,0 +1,69 @@
+package com.finsight.app.service;
+
+import com.finsight.app.exception.UserNotAuthenticatedException;
+import com.finsight.app.exception.UserNotFoundException;
+import com.finsight.app.model.User;
+import com.finsight.app.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import org.jetbrains.annotations.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.stereotype.Service;
+
+@Service
+public class UserService {
+
+  private final UserRepository userRepository;
+  private final BCryptPasswordEncoder bCryptPasswordEncoder;
+
+  @Autowired
+  UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    this.userRepository = userRepository;
+    this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+  }
+
+  public com.finsight.app.dto.User register(User user) {
+    user.setCreatedAt(LocalDateTime.now());
+    user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
+    User createdUser = userRepository.save(user);
+    return transformToDto(createdUser);
+  }
+
+  public void getCurrentUser(@NotNull String id) {
+    Optional<User> user = userRepository.findById(id);
+    if (user.isPresent()) {
+      return;
+    }
+    throw new UserNotFoundException("User not found");
+  }
+
+  public com.finsight.app.dto.User getCurrentUserDto(@NotNull String id) {
+    Optional<User> user = userRepository.findById(id);
+    if (user.isPresent()) {
+      return transformToDto(user.get());
+    }
+    throw new UserNotFoundException("User not found");
+  }
+
+  public String authenticate(String email, String password) {
+    Optional<User> userOpt = userRepository.findByEmail(email);
+
+    if (userOpt.isPresent()) {
+      User user = userOpt.get();
+
+      if (!bCryptPasswordEncoder.matches(password, user.getPassword())) {
+        throw new UserNotAuthenticatedException("Invalid password");
+      }
+
+      return user.getId();
+    } else {
+      throw new UserNotAuthenticatedException("User not found");
+    }
+  }
+
+  private com.finsight.app.dto.User transformToDto(@NotNull User user) {
+    return new com.finsight.app.dto.User(
+        user.getId(), user.getName(), user.getEmail(), user.getCreatedAt());
+  }
+}
