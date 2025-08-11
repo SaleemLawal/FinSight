@@ -81,7 +81,7 @@ public class AccountController {
     return ResponseEntity.ok(response);
   }
 
-  @GetMapping("/{accountId}/balance-series")
+  @GetMapping("/{accountId}/balance-history")
   public ResponseEntity<BalanceSeriesResponse> getBalanceSeries(
           @PathVariable String accountId,
           @RequestParam(defaultValue = "1M") String range,
