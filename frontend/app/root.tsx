@@ -15,7 +15,6 @@ import { AppSidebar } from '@/components/app-sidebar';
 
 import type { Route } from './+types/root';
 import './app.css';
-import { Separator } from './components/ui/separator';
 
 export const links: Route.LinksFunction = () => [
   { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -42,20 +41,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <body>
         <SidebarProvider>
           <AppSidebar />
-          <SidebarInset>
-            <div className="flex p-2 items-center gap-3">
-              <SidebarTrigger />
-              <Separator
-                orientation="vertical"
-                className="data-[orientation=vertical]:h-4 bg-sidebar-border"
-              />
-              <span className="text-md font-medium text-secondary-foreground">
-                Dashboard
-              </span>
-            </div>
-            <Separator />
-            <div className="p-8">{children}</div>
-          </SidebarInset>
+          <SidebarInset>{children}</SidebarInset>
         </SidebarProvider>
         <ScrollRestoration />
         <Scripts />

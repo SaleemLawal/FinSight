@@ -213,3 +213,7 @@ body {
     letter-spacing: var(--tracking-normal);
   }
 }
+
+.recharts-wrapper * {
+  outline: none;
+}

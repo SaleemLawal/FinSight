@@ -1,16 +1,16 @@
 // mockFinance.ts
-import { subDays, startOfYear } from "date-fns";
+import { subDays, startOfYear } from 'date-fns';
+import type { RangeKey } from 'types';
 
 export type Point = { date: Date; assets: number; debt: number };
-export type RangeKey = "1W" | "1M" | "3M" | "YTD" | "1Y" | "ALL";
 
 export type RangeBuckets = Record<RangeKey, Point[]>;
 
 export interface Kpis {
   assetsNow: number;
   debtNow: number;
-        assetsChangePct: number; 
-        debtChangePct: number;  
+  assetsChangePct: number;
+  debtChangePct: number;
 }
 
 const rand = (min: number, max: number) => Math.random() * (max - min) + min;
@@ -28,10 +28,10 @@ export function generateFinanceSeries(
   for (let i = days - 1; i >= 0; i--) {
     const date = subDays(today, i);
 
-    const aDrift = rand(0.02, 0.25); 
+    const aDrift = rand(0.02, 0.25);
     const aNoise = rand(-40, 40);
     assets = Math.max(0, assets + aDrift + aNoise * 100);
-    const dDrift = rand(-0.3, -0.05); 
+    const dDrift = rand(-0.3, -0.05);
     const dNoise = rand(-30, 30);
     debt = Math.max(0, debt + dDrift + dNoise);
 
@@ -48,17 +48,17 @@ export function generateFinanceSeries(
 export function sliceByRange(all: Point[], range: RangeKey): Point[] {
   const now = all[all.length - 1]?.date ?? new Date();
   switch (range) {
-    case "1W":
+    case '1W':
       return all.filter((d) => d.date >= subDays(now, 7));
-    case "1M":
+    case '1M':
       return all.filter((d) => d.date >= subDays(now, 30));
-    case "3M":
+    case '3M':
       return all.filter((d) => d.date >= subDays(now, 90));
-    case "YTD":
+    case 'YTD':
       return all.filter((d) => d.date >= startOfYear(now));
-    case "1Y":
+    case '1Y':
       return all.filter((d) => d.date >= subDays(now, 365));
-    case "ALL":
+    case 'ALL':
     default:
       return all;
   }
@@ -92,15 +92,18 @@ export function buildMockFinance(): {
   const all = generateFinanceSeries(730);
   const ranges: RangeBuckets = {
     ALL: all,
-    "1Y": sliceByRange(all, "1Y"),
-    "3M": sliceByRange(all, "3M"),
-    "1M": sliceByRange(all, "1M"),
-    "1W": sliceByRange(all, "1W"),
-    YTD: sliceByRange(all, "YTD"),
+    '1Y': sliceByRange(all, '1Y'),
+    '3M': sliceByRange(all, '3M'),
+    '1M': sliceByRange(all, '1M'),
+    '1W': sliceByRange(all, '1W'),
+    YTD: sliceByRange(all, 'YTD'),
   };
 
   const kpis = Object.fromEntries(
-    (Object.keys(ranges) as RangeKey[]).map((key) => [key, computeKpis(ranges[key])])
+    (Object.keys(ranges) as RangeKey[]).map((key) => [
+      key,
+      computeKpis(ranges[key]),
+    ])
   ) as Record<RangeKey, Kpis>;
 
   return { all, ranges, kpis };
