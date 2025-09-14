@@ -37,6 +37,9 @@ public class Transaction {
   @Column(name = "account_id")
   private String accountId;
 
+  @Column(name  = "account_name")
+  private String account;
+
   @Column(name = "category_id")
   private String categoryId;
 
@@ -59,7 +62,8 @@ public class Transaction {
       Boolean isPending,
       String accountId,
       String categoryId,
-      String userId) {
+      String userId,
+      String accountName) {
     this.transactionId = transactionId;
     this.date = date;
     this.merchant = merchant;
@@ -68,5 +72,6 @@ public class Transaction {
     this.accountId = accountId;
     this.categoryId = categoryId;
     this.userId = userId;
+    this.account = accountName;
   }
 }

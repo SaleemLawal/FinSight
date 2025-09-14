@@ -166,6 +166,14 @@ public class AccountService {
         points);
   }
 
+  public String getAccountName(String accountId) {
+//      Optional<Account> account = accountRepository.findById(accountId);
+//      if (account.isPresent()){
+//          return account.get().getName();
+//      }
+      return accountRepository.findById(accountId).get().getName();
+  }
+
   private LocalDateTime calculateStartDate(String accountId, String range, LocalDateTime endDate) {
       return switch (range.toUpperCase()) {
           case "1W" -> endDate.minusDays(7);

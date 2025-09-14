@@ -27,6 +27,7 @@ public class TransactionService {
   private final CategoryRepository categoryRepository;
   private final AccountRepository accountRepository;
   private final PlaidAccessTokenRepository plaidAccessTokenRepository;
+  private final AccountService accountService;
 
   @Autowired
   TransactionService(
@@ -34,12 +35,13 @@ public class TransactionService {
       UserService userService,
       CategoryRepository categoryRepository,
       AccountRepository accountRepository,
-      PlaidAccessTokenRepository plaidAccessTokenRepository) {
+      PlaidAccessTokenRepository plaidAccessTokenRepository, AccountService accountService) {
     this.transactionRepository = transactionRepository;
     this.userService = userService;
     this.categoryRepository = categoryRepository;
     this.accountRepository = accountRepository;
     this.plaidAccessTokenRepository = plaidAccessTokenRepository;
+      this.accountService = accountService;
   }
 
   public com.finsight.app.dto.Transaction createTransaction(
@@ -194,10 +196,12 @@ public class TransactionService {
         transaction.getCategoryId(),
         transaction.getUserId(),
         transaction.getCreatedAt(),
-        transaction.getUpdatedAt());
+        transaction.getUpdatedAt(),
+        transaction.getAccount());
   }
 
   private com.finsight.app.model.Transaction toEntity(Transaction txn, String userId) {
+
     return new com.finsight.app.model.Transaction(
         txn.getTransactionId(),
         txn.getDate().atStartOfDay(),
@@ -206,6 +210,7 @@ public class TransactionService {
         txn.getPending(),
         txn.getAccountId(),
         txn.getCategoryId(),
-        userId);
+        userId,
+        accountService.getAccountName(txn.getAccountId()));
   }
 }

@@ -21,4 +21,5 @@ public class Transaction {
   private String userId;
   private LocalDateTime createdAt;
   private LocalDateTime updatedAt;
+  private String accountName;
 }
