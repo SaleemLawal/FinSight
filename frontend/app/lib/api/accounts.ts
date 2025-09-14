@@ -21,6 +21,10 @@ export async function fetchAccountBalanceHistory(
   return get(`/user/accounts/${accountId}/balance-history?range=${range}`);
 }
 
+export async function fetchUserTransactions(): Promise<Transaction[]> {
+  return get(`/user/transactions`);
+}
+
 // export async function loginDemoUser() {
 //   return post<void, { email: string; password: string }>(
 //     `${apiClient.defaults.baseURL?.includes('/api') ? '/plaid/noop' : '/auth/login'}`,

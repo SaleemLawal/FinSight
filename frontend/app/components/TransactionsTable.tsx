@@ -13,7 +13,7 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
       {sortedDates.map((date) => (
         <div key={date}>
           {/* Date header */}
-          <h2 className="text-gray-400 text-sm font-semibold">
+          <h2 className="text-gray-400 text-sm font-semibold px-2">
             {dayjs(date).calendar(null, {
               sameDay: "[Today]",
               lastDay: "[Yesterday]",
@@ -25,12 +25,11 @@ export default function TransactionsTable({ transactions }: { transactions: Tran
           {/* Transactions for this date */}
           <div>
             {groupedTransactions[date].map((tx) => (
-              <div key={tx.id} className='flex items-center py-2'>
+              <div key={tx.id} className='flex items-center p-2 mb-1 hover:bg-foreground/10 rounded-md'>
                 <div className='w-1/2 flex items-center gap-4'>
-                <div className='font-medium'>{tx.merchant}</div>
-                <div className='text-sm text-gray-400'>{tx.accountName}</div>
+                    <div className='font-medium'>{tx.merchant}</div>
+                    <div className='text-sm text-gray-400'>{tx.accountName}</div>
                 </div>
-                
                 <div className="">{tx.categoryId ?? 'Uncategorized'}</div>
                 <div className='ml-auto'>{formatCurrency(tx.amount)}</div>
               </div>

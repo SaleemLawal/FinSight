@@ -61,10 +61,14 @@ const switchBadgeColor = (value: number) => {
 const groupByDate = (transactions: Transaction[]) => {
   return transactions.reduce<Record<string, Transaction[]>>((groups, tx) => {
     const date: string = dayjs(tx.date).format('YYYY-MM-DD');
-    if (!groups[date]) {
-      groups[date] = [];
+    // TODO: remove this once we have a way to handle transactions with no merchant
+    if(tx. merchant !== null) {
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      
+        groups[date].push(tx);
     }
-    groups[date].push(tx);
     return groups;
   }, {});
 };
