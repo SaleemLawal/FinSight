@@ -20,7 +20,7 @@ export default function AccountDetail({
   account: Account;
   transactions: Transaction[];
 }) {
-  const [range, setRange] = useState<RangeKey>('1W');
+  const [range, setRange] = useState<RangeKey>('3M');
   const [hoveredData, setHoveredData] = useState<BalanceHistoryPoint | null>(
     null
   );

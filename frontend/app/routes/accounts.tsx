@@ -1,6 +1,6 @@
 import type { Route } from './+types/accounts';
 import { Button } from '~/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Minus, Plus } from 'lucide-react';
 import AssetsVsDebt from '~/components/AssetsVsDebt';
 import { useState, useEffect, useCallback } from 'react';
 import {
@@ -23,7 +23,7 @@ import type {
   RangeKey,
   Transaction,
 } from 'types';
-import { formatCurrency } from '~/lib/utils';
+import { cn, formatCurrency, switchBadgeColor } from '~/lib/utils';
 import AccountDetail from '~/components/accountDetail';
 import BalanceOverTimeChartWrapper from '~/components/charts/balanceOverTimeChartWrapper';
 
@@ -32,7 +32,7 @@ export function meta({}: Route.MetaArgs) {
 }
 
 export default function Acounts() {
-  const [range, setRange] = useState<RangeKey>('1W');
+  const [range, setRange] = useState<RangeKey>('3M');
   const [selectedAccountType, setSelectedAccountType] = useState<string | null>(
     'Credit Card'
   );
@@ -138,10 +138,15 @@ export default function Acounts() {
                             }
                           />
                         </div>
-                        <Badge className="hidden md:inline-flex bg-green-200 text-green-400 items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1">
-                          ↑{' '}
-                          {(percentageChanges[account.id] * 100)?.toFixed(2) ??
-                            '0.00'}
+                        <Badge className={cn(
+                            'hidden md:inline-flex items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1',
+                            switchBadgeColor(percentageChanges[account.id])
+                          )}
+                        >
+                          {percentageChanges[account.id] > 0 ? <Plus /> : <Minus />}{' '}
+                          {Math.abs(percentageChanges[account.id] * 100)?.toFixed(
+                            2
+                          ) ?? '0.00'}
                           %
                         </Badge>
                         <div className="ml-auto">
@@ -192,10 +197,15 @@ export default function Acounts() {
                             }
                           />
                         </div>
-                        <Badge className="hidden md:inline-flex bg-green-200 text-green-400 items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1">
-                          ↑{' '}
-                          {(percentageChanges[account.id] * 100)?.toFixed(2) ??
-                            '0.00'}
+                        <Badge className={cn(
+                            'hidden md:inline-flex items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1',
+                            switchBadgeColor(percentageChanges[account.id])
+                          )}
+                        >
+                          {percentageChanges[account.id] > 0 ? <Plus /> : <Minus />}{' '}
+                          {Math.abs(percentageChanges[account.id] * 100)?.toFixed(
+                            2
+                          ) ?? '0.00'}
                           %
                         </Badge>
                         <div className="ml-auto">
@@ -246,10 +256,15 @@ export default function Acounts() {
                             }
                           />
                         </div>
-                        <Badge className="hidden md:inline-flex bg-green-200 text-green-400 items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1">
-                          ↑{' '}
-                          {(percentageChanges[account.id] * 100)?.toFixed(2) ??
-                            '0.00'}
+                        <Badge className={cn(
+                            'hidden md:inline-flex items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1',
+                            switchBadgeColor(percentageChanges[account.id])
+                          )}
+                        >
+                          {percentageChanges[account.id] > 0 ? <Plus /> : <Minus />}{' '}
+                          {Math.abs(percentageChanges[account.id] * 100)?.toFixed(
+                            2
+                          ) ?? '0.00'}
                           %
                         </Badge>
                         <div className="ml-auto">
@@ -300,10 +315,15 @@ export default function Acounts() {
                             }
                           />
                         </div>
-                        <Badge className="hidden md:inline-flex bg-green-200 text-green-400 items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1">
-                          ↑{' '}
-                          {(percentageChanges[account.id] * 100)?.toFixed(2) ??
-                            '0.00'}
+                        <Badge className={cn(
+                            'hidden md:inline-flex items-center gap-1 py-0.5 px-2 rounded-full text-sm font-semibold mt-1',
+                            switchBadgeColor(percentageChanges[account.id])
+                          )}
+                        >
+                          {percentageChanges[account.id] > 0 ? <Plus /> : <Minus />}{' '}
+                          {Math.abs(percentageChanges[account.id] * 100)?.toFixed(
+                            2
+                          ) ?? '0.00'}
                           %
                         </Badge>
                         <div className="ml-auto">
