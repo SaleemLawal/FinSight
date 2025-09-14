@@ -12,6 +12,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { fetchAccountBalanceHistory } from '~/lib/api/accounts';
 import type { RangeKey } from 'types';
 import BalanceOverTimeChart from './charts/balanceOverTimeChart';
+import { Separator } from './ui/separator';
+import TransactionsTable from './TransactionsTable';
 
 export default function AccountDetail({
   account,
@@ -136,6 +138,10 @@ export default function AccountDetail({
           </button>
         ))}
       </div>
+
+      <Separator className="my-6" />
+
+      <TransactionsTable transactions={transactions} />
     </div>
   );
 }

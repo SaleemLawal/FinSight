@@ -15,6 +15,7 @@ export type AccountType = 'DEPOSITORY' | 'CREDIT' | 'INVESTMENT' | 'LOAN';
 export type Transaction = {
   id: string;
   accountId: string;
+  accountName: string;
   date: string;
   merchant: string;
   description: string;

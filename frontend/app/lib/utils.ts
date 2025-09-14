@@ -1,5 +1,8 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import dayjs from "dayjs";
+import type { Transaction } from 'types';
+
 
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -55,4 +58,15 @@ const switchBadgeColor = (value: number) => {
   return 'bg-gray-200 text-gray-400';
 };
 
-export { cn, ratioTocolor, formatCurrency, switchBadgeColor };
+const groupByDate = (transactions: Transaction[]) => {
+  return transactions.reduce<Record<string, Transaction[]>>((groups, tx) => {
+    const date: string = dayjs(tx.date).format('YYYY-MM-DD');
+    if (!groups[date]) {
+      groups[date] = [];
+    }
+    groups[date].push(tx);
+    return groups;
+  }, {});
+};
+
+export { cn, ratioTocolor, formatCurrency, switchBadgeColor, groupByDate };
