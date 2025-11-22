@@ -26,3 +26,5 @@ backend/app/src/main/resources/application-dev.properties
 # Build outputs
 dist/
 build/
+
+backend/server/.env*
