@@ -5,34 +5,30 @@ import (
 	"net/http"
 )
 
-func sendError(w http.ResponseWriter, message string, statusCode int) {
+func SendError(w http.ResponseWriter, message string, statusCode int, code ...string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(APIError{
+	
+	apiError := APIError{
 		Error: message,
-	})
+	}
+	if len(code) > 0 && code[0] != "" {
+		apiError.Code = code[0]
+	}
+	
+	json.NewEncoder(w).Encode(apiError)
 }
 
-func SendErrorWithCode(w http.ResponseWriter, message, code string, statusCode int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	json.NewEncoder(w).Encode(APIError{
-		Error: message,
-		Code:  code,
-	})
-}
-
-func SendSuccess(w http.ResponseWriter, message string, data any) {
+func SendSuccess(w http.ResponseWriter, data any, message ...string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(APIMessage{
-		Message: message,
-		Data:    data,
-	})
-}
-
-func SendData(w http.ResponseWriter, data any) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(data)
+	
+	if len(message) > 0 && message[0] != "" {
+		json.NewEncoder(w).Encode(APIMessage{
+			Message: message[0],
+			Data:    data,
+		})
+	} else {
+		json.NewEncoder(w).Encode(data)
+	}
 }

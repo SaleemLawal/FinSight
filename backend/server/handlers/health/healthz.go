@@ -7,5 +7,5 @@ import (
 )
 
 func Healthz(w http.ResponseWriter, r *http.Request) {
-	utils.SendSuccess(w, "API is live ✅", nil)
+	utils.SendSuccess(w, nil, "API is live ✅")
 }

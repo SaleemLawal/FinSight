@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	"github.com/saleemlawal/FinSight/backend/handlers/health"
+	"github.com/saleemlawal/FinSight/backend/routes"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -21,12 +21,9 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
 
-	apiRouter := chi.NewRouter()
-
-	apiRouter.Get("/healthz", health.Healthz)
-
-	r.Mount("/api/v1", apiRouter)
+	r.Mount("/api", routes.ApiRouter())
 
 	http.ListenAndServe(":"+string(PORT), r)
 }
