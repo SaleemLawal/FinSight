@@ -11,6 +11,7 @@ func SendError(w http.ResponseWriter, message string, statusCode int, code ...st
 	
 	apiError := APIError{
 		Error: message,
+		
 	}
 	if len(code) > 0 && code[0] != "" {
 		apiError.Code = code[0]

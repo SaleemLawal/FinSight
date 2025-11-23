@@ -4,7 +4,7 @@ package utils
 type APIError struct {
 	Error   string `json:"error"`
 	Code    string `json:"code,omitempty"`
-	Details string `json:"details,omitempty"`
+	// Details string `json:"details,omitempty"`
 }
 
 // APIMessage represents a success response
