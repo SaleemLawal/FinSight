@@ -18,7 +18,7 @@ import (
 )
 
 type UserHandler struct {
-	queries *db.Queries
+	queries db.Querier
 }
 
 func NewUserHandler(conn *sql.DB) *UserHandler {
@@ -37,8 +37,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user.Name = strings.TrimSpace(user.Name)
 	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
-
-	// TODO: Validate user input
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	if err != nil {
@@ -63,7 +61,6 @@ func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
 }
 
 func(h *UserHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {	
-	// TODO: Get current user from session
 	userId, err := middleware.GetUserID(r)
 	if err != nil {
 		utils.SendError(w, err.Error(), http.StatusUnauthorized, "UNAUTHORIZED")
