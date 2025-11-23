@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/lib/pq"
 	db "github.com/saleemlawal/FinSight/backend/db/sqlc"
@@ -19,34 +20,56 @@ import (
 
 type UserHandler struct {
 	queries db.Querier
+	validator *validator.Validate
 }
 
 func NewUserHandler(conn *sql.DB) *UserHandler {
 	return &UserHandler{
-		queries: db.New(conn),
+		queries: db. New(conn),
+		validator: validator.New(),
 	}
 }
 
 func (h *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
-	user := db.CreateUserParams{}
-	err := json.NewDecoder(r.Body).Decode(&user)
-	if err != nil {
+	var req models.RegisterRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		utils.SendError(w, "Invalid request body", http.StatusBadRequest, "INVALID_REQUEST_BODY")
 		return
 	}
 
-	user.Name = strings.TrimSpace(user.Name)
-	user.Email = strings.TrimSpace(strings.ToLower(user.Email))
+	req.Name = strings.TrimSpace(req.Name)
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	fieldMapper := func(fieldName string) (string, string) {
+		switch fieldName {
+		case "Name":
+			return "Invalid name", "INVALID_NAME"
+		case "Email":
+			return "Invalid email format", "INVALID_EMAIL"
+		case "Password":
+			return "Password too short", "INVALID_PASSWORD"
+		default:
+			return "Validation failed", "VALIDATION_ERROR"
+		}
+	}
+
+	if !utils.ValidateStruct(w, h.validator, req, fieldMapper) {
+		return
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		utils.SendError(w, "Failed to process password", http.StatusInternalServerError, "INTERNAL_SERVER_ERROR")
 		return
 	}
 
-	user.Password = string(hashedPassword)
+	createUserParams := db.CreateUserParams{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: string(hashedPassword),
+	}
 
-	_, err = h.queries.CreateUser(r.Context(), user)
+	_, err = h.queries.CreateUser(r.Context(), createUserParams)
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" {
@@ -78,27 +101,38 @@ func(h *UserHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func(h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
-	loginRequest := models.LoginRequest{}
-
-	if err := json.NewDecoder(r.Body).Decode(&loginRequest); err != nil {
-		utils.SendError(w, err.Error(), http.StatusBadRequest, "INVALID_REQUEST_BODY")
+	var req models.LoginRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.SendError(w, "Invalid request body", http.StatusBadRequest, "INVALID_REQUEST_BODY")
 		return
 	}
 
-	if loginRequest.Email == "" || loginRequest.Password == "" {
-		utils.SendError(w, "Email and password are required", http.StatusBadRequest, "INVALID_REQUEST")
+	req.Email = strings.TrimSpace(strings.ToLower(req.Email))
+
+	fieldMapper := func(fieldName string) (string, string) {
+		switch fieldName {
+		case "Email":
+			return "Invalid email format", "INVALID_EMAIL"
+		case "Password":
+			return "Password is required", "INVALID_PASSWORD"
+		default:
+			return "Validation failed", "VALIDATION_ERROR"
+		}
+	}
+
+	if !utils.ValidateStruct(w, h.validator, req, fieldMapper) {
 		return
 	}
 
 	// Get User by email
-	user, err := h.queries.GetUserByEmail(r.Context(), loginRequest.Email)
+	user, err := h.queries.GetUserByEmail(r.Context(), req.Email)
 	if err != nil {
 		utils.SendError(w, "User not found", http.StatusNotFound, "USER_NOT_FOUND")
 		return
 	}
 
 	// Compare password
-	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginRequest.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
 		utils.SendError(w, "Invalid password", http.StatusUnauthorized, "INVALID_PASSWORD")
 		return
 	}

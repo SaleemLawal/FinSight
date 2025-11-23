@@ -11,10 +11,12 @@ import (
 	"os"
 	"testing"
 
+	"github.com/go-playground/validator/v10"
 	"github.com/lib/pq"
 	db "github.com/saleemlawal/FinSight/backend/db/sqlc"
 	"github.com/saleemlawal/FinSight/backend/middleware"
 	"github.com/saleemlawal/FinSight/backend/models"
+	"github.com/saleemlawal/FinSight/backend/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"golang.org/x/crypto/bcrypt"
@@ -42,6 +44,7 @@ func (m *MockQuerier) GetUserById(ctx context.Context, id int32) (db.GetUserById
 func createTestHandler(mock *MockQuerier) *UserHandler {
 	return &UserHandler{
 		queries: mock,
+		validator: validator.New(),
 	}
 }
 
@@ -131,12 +134,10 @@ func TestRegister(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, w.Code, "Status code should match")
 
 			if tt.expectedCode != "" {
-				var response map[string]interface{}
-				err := json.Unmarshal(w.Body.Bytes(), &response)
+				var apiError utils.APIError
+				err := json.Unmarshal(w.Body.Bytes(), &apiError)
 				assert.NoError(t, err, "Failed to unmarshal response")
-				if code, ok := response["code"].(string); ok {
-					assert.Equal(t, tt.expectedCode, code, "Error code should match")
-				}
+				assert.Equal(t, tt.expectedCode, apiError.Code, "Error code should match")
 			}
 
 			mockQuerier.AssertExpectations(t)
@@ -189,7 +190,7 @@ func TestLogin(t *testing.T) {
 			mockSetup: func(m *MockQuerier) {
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedCode:   "INVALID_REQUEST",
+			expectedCode:   "INVALID_EMAIL",
 		},
 		{
 			name: "missing password",
@@ -199,7 +200,7 @@ func TestLogin(t *testing.T) {
 			mockSetup: func(m *MockQuerier) {
 			},
 			expectedStatus: http.StatusBadRequest,
-			expectedCode:   "INVALID_REQUEST",
+			expectedCode:   "INVALID_PASSWORD",
 		},
 		{
 			name: "user not found",
@@ -256,12 +257,10 @@ func TestLogin(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, w.Code, "Status code should match")
 
 			if tt.expectedCode != "" {
-				var response map[string]interface{}
-				err := json.Unmarshal(w.Body.Bytes(), &response)
+				var apiError utils.APIError
+				err := json.Unmarshal(w.Body.Bytes(), &apiError)
 				assert.NoError(t, err, "Failed to unmarshal response")
-				if code, ok := response["code"].(string); ok {
-					assert.Equal(t, tt.expectedCode, code, "Error code should match")
-				}
+				assert.Equal(t, tt.expectedCode, apiError.Code, "Error code should match")
 			}
 
 			if tt.validateToken {
@@ -338,12 +337,10 @@ func TestGetCurrentUser(t *testing.T) {
 			assert.Equal(t, tt.expectedStatus, w.Code, "Status code should match")
 
 			if tt.expectedCode != "" {
-				var response map[string]interface{}
-				err := json.Unmarshal(w.Body.Bytes(), &response)
+				var apiError utils.APIError
+				err := json.Unmarshal(w.Body.Bytes(), &apiError)
 				assert.NoError(t, err, "Failed to unmarshal response")
-				if code, ok := response["code"].(string); ok {
-					assert.Equal(t, tt.expectedCode, code, "Error code should match")
-				}
+				assert.Equal(t, tt.expectedCode, apiError.Code, "Error code should match")
 			}
 
 			mockQuerier.AssertExpectations(t)
