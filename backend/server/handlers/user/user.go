@@ -1,6 +1,7 @@
 package user
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -18,8 +19,14 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+type UserQuerier interface {
+	CreateUser(ctx context.Context, arg db.CreateUserParams) (db.CreateUserRow, error)
+	GetUserByEmail(ctx context.Context, email string) (db.GetUserByEmailRow, error)
+	GetUserById(ctx context.Context, id int32) (db.GetUserByIdRow, error)
+}
+
 type UserHandler struct {
-	queries db.Querier
+	queries UserQuerier
 	validator *validator.Validate
 }
 

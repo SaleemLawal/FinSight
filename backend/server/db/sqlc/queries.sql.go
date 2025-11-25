@@ -8,7 +8,60 @@ package db
 import (
 	"context"
 	"database/sql"
+
+	"github.com/shopspring/decimal"
 )
+
+const createAccount = `-- name: CreateAccount :one
+INSERT INTO accounts (name, type, institution_name, institution_id, last_four, balance, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at
+`
+
+type CreateAccountParams struct {
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	UserID          int32           `json:"user_id"`
+}
+
+type CreateAccountRow struct {
+	ID              int32           `json:"id"`
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	CreatedAt       sql.NullTime    `json:"created_at"`
+	UpdatedAt       sql.NullTime    `json:"updated_at"`
+}
+
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (CreateAccountRow, error) {
+	row := q.db.QueryRowContext(ctx, createAccount,
+		arg.Name,
+		arg.Type,
+		arg.InstitutionName,
+		arg.InstitutionID,
+		arg.LastFour,
+		arg.Balance,
+		arg.UserID,
+	)
+	var i CreateAccountRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Type,
+		&i.InstitutionName,
+		&i.InstitutionID,
+		&i.LastFour,
+		&i.Balance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email, created_at, updated_at
@@ -39,6 +92,93 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getAccountByIdAndUserId = `-- name: GetAccountByIdAndUserId :one
+SELECT id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at FROM accounts WHERE id = $1 AND user_id = $2
+`
+
+type GetAccountByIdAndUserIdParams struct {
+	ID     int32 `json:"id"`
+	UserID int32 `json:"user_id"`
+}
+
+type GetAccountByIdAndUserIdRow struct {
+	ID              int32           `json:"id"`
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	CreatedAt       sql.NullTime    `json:"created_at"`
+	UpdatedAt       sql.NullTime    `json:"updated_at"`
+}
+
+func (q *Queries) GetAccountByIdAndUserId(ctx context.Context, arg GetAccountByIdAndUserIdParams) (GetAccountByIdAndUserIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getAccountByIdAndUserId, arg.ID, arg.UserID)
+	var i GetAccountByIdAndUserIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Type,
+		&i.InstitutionName,
+		&i.InstitutionID,
+		&i.LastFour,
+		&i.Balance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getAccountsByUserId = `-- name: GetAccountsByUserId :many
+SELECT id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at FROM accounts WHERE user_id = $1
+`
+
+type GetAccountsByUserIdRow struct {
+	ID              int32           `json:"id"`
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	CreatedAt       sql.NullTime    `json:"created_at"`
+	UpdatedAt       sql.NullTime    `json:"updated_at"`
+}
+
+func (q *Queries) GetAccountsByUserId(ctx context.Context, userID int32) ([]GetAccountsByUserIdRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAccountsByUserId, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAccountsByUserIdRow
+	for rows.Next() {
+		var i GetAccountsByUserIdRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Type,
+			&i.InstitutionName,
+			&i.InstitutionID,
+			&i.LastFour,
+			&i.Balance,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
@@ -78,5 +218,56 @@ func (q *Queries) GetUserById(ctx context.Context, id int32) (GetUserByIdRow, er
 	row := q.db.QueryRowContext(ctx, getUserById, id)
 	var i GetUserByIdRow
 	err := row.Scan(&i.ID, &i.Name, &i.Email)
+	return i, err
+}
+
+const updateAccount = `-- name: UpdateAccount :one
+UPDATE accounts SET name = $1, type = $2, institution_name = $3, institution_id = $4, last_four = $5, balance = $6 WHERE id = $7 RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at
+`
+
+type UpdateAccountParams struct {
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	ID              int32           `json:"id"`
+}
+
+type UpdateAccountRow struct {
+	ID              int32           `json:"id"`
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	CreatedAt       sql.NullTime    `json:"created_at"`
+	UpdatedAt       sql.NullTime    `json:"updated_at"`
+}
+
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (UpdateAccountRow, error) {
+	row := q.db.QueryRowContext(ctx, updateAccount,
+		arg.Name,
+		arg.Type,
+		arg.InstitutionName,
+		arg.InstitutionID,
+		arg.LastFour,
+		arg.Balance,
+		arg.ID,
+	)
+	var i UpdateAccountRow
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Type,
+		&i.InstitutionName,
+		&i.InstitutionID,
+		&i.LastFour,
+		&i.Balance,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
 	return i, err
 }

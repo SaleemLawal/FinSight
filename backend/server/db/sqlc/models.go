@@ -6,7 +6,22 @@ package db
 
 import (
 	"database/sql"
+
+	"github.com/shopspring/decimal"
 )
+
+type Account struct {
+	ID              int32           `json:"id"`
+	Name            string          `json:"name"`
+	Type            string          `json:"type"`
+	InstitutionName string          `json:"institution_name"`
+	InstitutionID   string          `json:"institution_id"`
+	LastFour        string          `json:"last_four"`
+	Balance         decimal.Decimal `json:"balance"`
+	UserID          int32           `json:"user_id"`
+	CreatedAt       sql.NullTime    `json:"created_at"`
+	UpdatedAt       sql.NullTime    `json:"updated_at"`
+}
 
 type User struct {
 	ID        int32        `json:"id"`

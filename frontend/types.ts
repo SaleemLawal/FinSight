@@ -10,7 +10,7 @@ export type Account = {
   userId: string;
 };
 
-export type AccountType = 'DEPOSITORY' | 'CREDIT' | 'INVESTMENT' | 'LOAN';
+export type AccountType = "DEPOSITORY" | "CREDIT" | "INVESTMENT" | "LOAN";
 
 export type Transaction = {
   id: string;
@@ -40,4 +40,4 @@ export type BalanceHistoryPoint = {
   balance: number;
 };
 
-export type RangeKey = '1W' | '1M' | '3M' | 'YTD' | '1Y' | 'ALL';
+export type RangeKey = "1W" | "1M" | "3M" | "YTD" | "1Y" | "ALL";
