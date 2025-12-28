@@ -11,6 +11,7 @@ import (
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (CreateAccountRow, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error)
+	DeleteAccount(ctx context.Context, arg DeleteAccountParams) error
 	GetAccountByIdAndUserId(ctx context.Context, arg GetAccountByIdAndUserIdParams) (GetAccountByIdAndUserIdRow, error)
 	GetAccountsByUserId(ctx context.Context, userID int32) ([]GetAccountsByUserIdRow, error)
 	GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error)

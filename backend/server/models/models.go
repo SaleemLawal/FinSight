@@ -39,3 +39,7 @@ type UpdateAccountRequest struct {
 	LastFour *string `json:"last_four,omitempty" validate:"omitempty,min=4,max=4"`
 	Balance *float64 `json:"balance,omitempty" validate:"omitempty"`
 }
+
+type DeleteAccountRequest struct {
+	AccountId string `json:"account_id" validate:"required"`
+}

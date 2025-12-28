@@ -94,6 +94,20 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 	return i, err
 }
 
+const deleteAccount = `-- name: DeleteAccount :exec
+DELETE FROM accounts WHERE id = $1 AND user_id = $2
+`
+
+type DeleteAccountParams struct {
+	ID     int32 `json:"id"`
+	UserID int32 `json:"user_id"`
+}
+
+func (q *Queries) DeleteAccount(ctx context.Context, arg DeleteAccountParams) error {
+	_, err := q.db.ExecContext(ctx, deleteAccount, arg.ID, arg.UserID)
+	return err
+}
+
 const getAccountByIdAndUserId = `-- name: GetAccountByIdAndUserId :one
 SELECT id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at FROM accounts WHERE id = $1 AND user_id = $2
 `
@@ -222,7 +236,7 @@ func (q *Queries) GetUserById(ctx context.Context, id int32) (GetUserByIdRow, er
 }
 
 const updateAccount = `-- name: UpdateAccount :one
-UPDATE accounts SET name = $1, type = $2, institution_name = $3, institution_id = $4, last_four = $5, balance = $6 WHERE id = $7 RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at
+UPDATE accounts SET name = $1, type = $2, institution_name = $3, institution_id = $4, last_four = $5, balance = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at
 `
 
 type UpdateAccountParams struct {

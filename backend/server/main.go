@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	"github.com/saleemlawal/FinSight/backend/routes"
 
 	"github.com/go-chi/chi/v5"
@@ -15,10 +15,12 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
+	log.Println("Starting server...")
+	
 	PORT := os.Getenv("PORT")
 	dbURL := os.Getenv("DATABASE_URL")
 

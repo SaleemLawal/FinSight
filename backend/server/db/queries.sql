@@ -17,4 +17,7 @@ SELECT id, name, type, institution_name, institution_id, last_four, balance, cre
 SELECT id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at FROM accounts WHERE id = $1 AND user_id = $2;
 
 -- name: UpdateAccount :one
-UPDATE accounts SET name = $1, type = $2, institution_name = $3, institution_id = $4, last_four = $5, balance = $6 WHERE id = $7 RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at;
+UPDATE accounts SET name = $1, type = $2, institution_name = $3, institution_id = $4, last_four = $5, balance = $6, updated_at = CURRENT_TIMESTAMP WHERE id = $7 RETURNING id, name, type, institution_name, institution_id, last_four, balance, created_at, updated_at;
+
+-- name: DeleteAccount :exec
+DELETE FROM accounts WHERE id = $1 AND user_id = $2;

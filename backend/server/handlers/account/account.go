@@ -21,6 +21,7 @@ type AccountQuerier interface {
 	GetAccountsByUserId(ctx context.Context, userID int32) ([]db.GetAccountsByUserIdRow, error)
 	GetAccountByIdAndUserId(ctx context.Context, arg db.GetAccountByIdAndUserIdParams) (db.GetAccountByIdAndUserIdRow, error)
 	UpdateAccount(ctx context.Context, arg db.UpdateAccountParams) (db.UpdateAccountRow, error)
+	DeleteAccount(ctx context.Context, arg db.DeleteAccountParams) error
 }
 
 type AccountHandler struct {
@@ -164,7 +165,11 @@ func (h *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	})
 
 	if err != nil {
-		utils.SendError(w, "Failed to get account", http.StatusInternalServerError, "FAILED_TO_GET_ACCOUNT")
+		if err == sql.ErrNoRows {
+			utils.SendError(w, "Account not found", http.StatusNotFound, "ACCOUNT_NOT_FOUND")
+			return
+		}
+		utils.SendError(w, "Failed to get account", http.StatusInternalServerError, "INTERNAL_ERROR")
 		return
 	}
 
@@ -211,4 +216,52 @@ func (h *AccountHandler) UpdateAccount(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SendSuccess(w, updatedAccount, "Account updated successfully")
+}
+
+func (h *AccountHandler) DeleteAccount(w http.ResponseWriter, r *http.Request) {
+	userId, err := middleware.GetUserID(r)
+	if err != nil {
+		utils.SendError(w, err.Error(), http.StatusUnauthorized, "UNAUTHORIZED")
+		return
+	}
+
+	accountId := chi.URLParam(r, "accountId")
+	if accountId == "" {
+		utils.SendError(w, "Account id is required", http.StatusBadRequest, "BAD_REQUEST")
+		return
+	}
+
+	parsedInt64, err := strconv.ParseInt(accountId, 10, 32)
+	if err != nil {
+		utils.SendError(w, "Invalid account id", http.StatusBadRequest, "INVALID_ACCOUNT_ID")
+		return
+	}
+
+	accountIdInt32 := int32(parsedInt64)
+
+	// Verify the account exists and belongs to the user before deleting
+	_, err = h.queries.GetAccountByIdAndUserId(r.Context(), db.GetAccountByIdAndUserIdParams{
+		ID: accountIdInt32,
+		UserID: userId,
+	})
+	if err != nil {
+		if err == sql.ErrNoRows {
+			utils.SendError(w, "Account not found", http.StatusNotFound, "ACCOUNT_NOT_FOUND")
+			return
+		}
+		utils.SendError(w, "Failed to get account", http.StatusInternalServerError, "INTERNAL_ERROR")
+		return
+	}
+
+	err = h.queries.DeleteAccount(r.Context(), db.DeleteAccountParams{
+		ID: accountIdInt32,
+		UserID: userId,
+	})
+
+	if err != nil {
+		utils.SendError(w, "Failed to delete account", http.StatusInternalServerError, "INTERNAL_ERROR")
+		return
+	}
+
+	utils.SendSuccess(w, nil, "Account deleted successfully")
 }

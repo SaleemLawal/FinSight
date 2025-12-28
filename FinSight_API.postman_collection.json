@@ -71,7 +71,7 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user",
+              "raw": "{{baseUrl}}/api/users",
               "host": ["{{baseUrl}}"],
               "path": ["api", "user"]
             },
@@ -98,9 +98,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/api/user",
+                  "raw": "{{baseUrl}}/api/users",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user"]
+                  "path": ["api", "users"]
                 }
               },
               "status": "OK",
@@ -134,9 +134,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/api/user",
+                  "raw": "{{baseUrl}}/api/users",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user"]
+                  "path": ["api", "users"]
                 }
               },
               "status": "Conflict",
@@ -189,9 +189,9 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/api/user/login",
+              "raw": "{{baseUrl}}/api/users/login",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "user", "login"]
+              "path": ["api", "users", "login"]
             },
             "description": "Login with email and password. Automatically saves the JWT token to the environment variable 'authToken'."
           },
@@ -216,9 +216,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/api/user/login",
+                  "raw": "{{baseUrl}}/api/users/login",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user", "login"]
+                  "path": ["api", "users", "login"]
                 }
               },
               "status": "OK",
@@ -252,9 +252,9 @@
                   }
                 },
                 "url": {
-                  "raw": "{{baseUrl}}/api/user/login",
+                  "raw": "{{baseUrl}}/api/users/login",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user", "login"]
+                  "path": ["api", "users", "login"]
                 }
               },
               "status": "Unauthorized",
@@ -282,9 +282,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/user",
+              "raw": "{{baseUrl}}/api/users",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "user"]
+              "path": ["api", "users"]
             },
             "description": "Get the currently authenticated user's information. Requires authentication."
           },
@@ -300,9 +300,9 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/user",
+                  "raw": "{{baseUrl}}/api/users",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user"]
+                  "path": ["api", "users"]
                 }
               },
               "status": "OK",
@@ -322,9 +322,9 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/api/user",
+                  "raw": "{{baseUrl}}/api/users",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user"]
+                  "path": ["api", "users"]
                 }
               },
               "status": "Unauthorized",
@@ -352,9 +352,9 @@
               }
             ],
             "url": {
-              "raw": "{{baseUrl}}/api/user/logout",
+              "raw": "{{baseUrl}}/api/users/logout",
               "host": ["{{baseUrl}}"],
-              "path": ["api", "user", "logout"]
+              "path": ["api", "users", "logout"]
             },
             "description": "Logout the current user. Requires authentication. Note: Currently returns success but session invalidation is TODO."
           },
@@ -370,9 +370,9 @@
                   }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/user/logout",
+                  "raw": "{{baseUrl}}/api/users/logout",
                   "host": ["{{baseUrl}}"],
-                  "path": ["api", "user", "logout"]
+                  "path": ["api", "users", "logout"]
                 }
               },
               "status": "OK",
@@ -385,6 +385,518 @@
                 }
               ],
               "body": "{\n    \"message\": \"Logout successful\",\n    \"data\": null\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Account",
+      "item": [
+        {
+          "name": "Create Account",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "description": "JWT token obtained from login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Chase Checking\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5000.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            },
+            "description": "Create a new account. Requires authentication. Account type must be one of: CREDIT, DEPOSITORY, INVESTMENT, LOAN."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Chase Checking\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5000.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"Account created successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"Chase Checking\",\n        \"type\": \"DEPOSITORY\",\n        \"institution_name\": \"Chase Bank\",\n        \"institution_id\": \"ins_123\",\n        \"last_four\": \"1234\",\n        \"balance\": \"5000.00\",\n        \"created_at\": \"2024-01-01T00:00:00Z\",\n        \"updated_at\": \"2024-01-01T00:00:00Z\"\n    }\n}"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"\",\n    \"type\": \"INVALID_TYPE\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"12\",\n    \"balance\": 5000.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Invalid name\",\n    \"code\": \"INVALID_NAME\"\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Chase Checking\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5000.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Unauthorized\",\n    \"code\": \"UNAUTHORIZED\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Accounts",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "description": "JWT token obtained from login"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts"]
+            },
+            "description": "Get all accounts for the currently authenticated user. Requires authentication."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"Accounts retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"Chase Checking\",\n            \"type\": \"DEPOSITORY\",\n            \"institution_name\": \"Chase Bank\",\n            \"institution_id\": \"ins_123\",\n            \"last_four\": \"1234\",\n            \"balance\": \"5000.00\",\n            \"created_at\": \"2024-01-01T00:00:00Z\",\n            \"updated_at\": \"2024-01-01T00:00:00Z\"\n        },\n        {\n            \"id\": 2,\n            \"name\": \"Chase Credit Card\",\n            \"type\": \"CREDIT\",\n            \"institution_name\": \"Chase Bank\",\n            \"institution_id\": \"ins_123\",\n            \"last_four\": \"5678\",\n            \"balance\": \"-250.00\",\n            \"created_at\": \"2024-01-02T00:00:00Z\",\n            \"updated_at\": \"2024-01-02T00:00:00Z\"\n        }\n    ]\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Unauthorized\",\n    \"code\": \"UNAUTHORIZED\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update Account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "description": "JWT token obtained from login"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Chase Checking Updated\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5500.00\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "1"]
+            },
+            "description": "Update an existing account by ID. Requires authentication. Account type must be one of: CREDIT, DEPOSITORY, INVESTMENT, LOAN."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Chase Checking Updated\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5500.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"Account updated successfully\",\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"Chase Checking Updated\",\n        \"type\": \"DEPOSITORY\",\n        \"institution_name\": \"Chase Bank\",\n        \"institution_id\": \"ins_123\",\n        \"last_four\": \"1234\",\n        \"balance\": \"5500.00\",\n        \"created_at\": \"2024-01-01T00:00:00Z\",\n        \"updated_at\": \"2024-01-15T00:00:00Z\"\n    }\n}"
+            },
+            {
+              "name": "Validation Error",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"\",\n    \"type\": \"INVALID_TYPE\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"12\",\n    \"balance\": 5500.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "1"]
+                }
+              },
+              "status": "Bad Request",
+              "code": 400,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Invalid name\",\n    \"code\": \"INVALID_NAME\"\n}"
+            },
+            {
+              "name": "Account Not Found",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Chase Checking Updated\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5500.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/999",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "999"]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Failed to update account\",\n    \"code\": \"INTERNAL_ERROR\"\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"name\": \"Chase Checking Updated\",\n    \"type\": \"DEPOSITORY\",\n    \"institution_name\": \"Chase Bank\",\n    \"institution_id\": \"ins_123\",\n    \"last_four\": \"1234\",\n    \"balance\": 5500.00\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "1"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Unauthorized\",\n    \"code\": \"UNAUTHORIZED\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}",
+                "description": "JWT token obtained from login"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/accounts/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "accounts", "1"]
+            },
+            "description": "Delete an account by ID. Requires authentication. Only the account owner can delete their account."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "1"]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"message\": \"Account deleted successfully\",\n    \"data\": null\n}"
+            },
+            {
+              "name": "Account Not Found",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/999",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "999"]
+                }
+              },
+              "status": "Not Found",
+              "code": 404,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Account not found\",\n    \"code\": \"ACCOUNT_NOT_FOUND\"\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/accounts/1",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "accounts", "1"]
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n    \"error\": \"Unauthorized\",\n    \"code\": \"UNAUTHORIZED\"\n}"
             }
           ]
         }

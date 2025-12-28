@@ -1,4 +1,52 @@
 services:
+  frontend:
+    init: true
+    image: frontend:latest
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - frontend
+  backend:
+    init: true
+    image: backend:latest
+    build:
+      context: ./backend/server
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=finsight
+      - PORT=8080
+      - DATABASE_URL=postgres://postgres:postgres@postgres:5432/finsight?sslmode=disable
+      - JWT_SECRET=secret
+    networks:
+      - frontend
+      - backend
+    volumes:
+      - type: bind
+        source: ./backend/server
+        target: /app
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - backend
   postgres:
     image: postgres:15
     container_name: finsight-postgres
@@ -10,21 +58,18 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./backend/server/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      - type: bind
+        source: ./backend/server/db/schema.sql
+        target: /docker-entrypoint-initdb.d/schema.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@example.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
+    networks:
+      - backend
 volumes:
   postgres_data:
+networks:
+  backend:
+  frontend:
