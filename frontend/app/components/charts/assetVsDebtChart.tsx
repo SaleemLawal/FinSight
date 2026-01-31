@@ -6,7 +6,6 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  ReferenceLine,
 } from 'recharts';
 import { format } from 'date-fns';
 import { memo } from 'react';
@@ -20,26 +19,11 @@ interface ChartProps {
   ) => void;
 }
 
-// const MiniTooltip = ({ active, payload, label }: any) => {
-//     if (!active || !payload?.length) return null;
-//     return (
-//         <div className="text-xs font-mono space-y-1">
-//             <div className="text-slate-400 font-bold">{format(label, "MMM d")}</div>
-//             {payload.map((p: any) => (
-//                 <div key={p.dataKey} className="flex justify-between gap-2">
-//                     <span className="flex items-center gap-1">
-//                         <span
-//                             className="inline-block w-1.5 h-1.5 rounded-full"
-//                             style={{ background: p.color }}
-//                         />
-//                         {p.dataKey === "assets" ? "Assets" : "Debt"}
-//                     </span>
-//                     <span>${p.value.toLocaleString()}</span>
-//                 </div>
-//             ))}
-//         </div>
-//     );
-// };
+// Chart colors matching theme
+const ASSETS_COLOR = 'oklch(0.65 0.15 220)';  // Blue
+const DEBT_COLOR = 'oklch(0.65 0.15 30)';     // Orange
+const CURSOR_COLOR = 'oklch(0.45 0.01 260)';  // Muted gray
+const BG_COLOR = 'oklch(0.18 0.005 260)';     // Card background
 
 const VerticalCursorWithDate = ({ points, height, payload }: any) => {
   if (!points || points.length === 0 || !payload?.[0]) return null;
@@ -51,14 +35,33 @@ const VerticalCursorWithDate = ({ points, height, payload }: any) => {
 
   return (
     <g>
-      <line x1={x} x2={x} y1={0} y2={height} stroke="#6b7280" strokeWidth={1} />
+      <line 
+        x1={x} 
+        x2={x} 
+        y1={0} 
+        y2={height} 
+        stroke={CURSOR_COLOR} 
+        strokeWidth={1} 
+        strokeDasharray="4 4"
+      />
+      <rect
+        x={x - 24}
+        y={height - 24}
+        width={48}
+        height={18}
+        rx={4}
+        fill={BG_COLOR}
+        stroke={CURSOR_COLOR}
+        strokeWidth={1}
+      />
       <text
-        x={x + 20}
-        y={height - 90}
+        x={x}
+        y={height - 11}
         textAnchor="middle"
-        fill="#6b7280"
+        fill="oklch(0.7 0.02 250)"
         fontSize="10"
-        fontFamily="monospace"
+        fontFamily="IBM Plex Mono, monospace"
+        fontWeight="500"
       >
         {format(date, 'MMM d')}
       </text>
@@ -75,7 +78,6 @@ const AssetsVsDebtCardChart = memo(function AssetsVsDebtCardChart({
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload?.[0]) {
       const point = payload[0].payload;
-      // const currentIndex = data.findIndex(d => d.date.getTime() === point.date.getTime());
 
       const firstPoint = data[0];
       const assetsChangePct =
@@ -99,21 +101,35 @@ const AssetsVsDebtCardChart = memo(function AssetsVsDebtCardChart({
   };
 
   return (
-    <>
-      <ResponsiveContainer width="100%" height={110}>
-        <LineChart data={data}>
+    <div className="relative">
+      <ResponsiveContainer width="100%" height={130}>
+        <LineChart data={data} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+          <defs>
+            <linearGradient id="assetsGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={ASSETS_COLOR} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={ASSETS_COLOR} stopOpacity={0} />
+            </linearGradient>
+            <linearGradient id="debtGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={DEBT_COLOR} stopOpacity={0.3} />
+              <stop offset="100%" stopColor={DEBT_COLOR} stopOpacity={0} />
+            </linearGradient>
+            {/* Glow filter */}
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
           <XAxis
             dataKey="date"
             tickFormatter={(d: Date) => format(d, 'MMM')}
             hide
           />
           <YAxis hide domain={['auto', 'auto']} />
-          {/* <ReferenceLine
-                        ifOverflow="extendDomain"
-                        stroke="#444c55"
-                        strokeWidth={2}
-                        strokeDasharray="1 6"
-                    /> */}
+
           <Tooltip
             content={<CustomTooltip />}
             cursor={<VerticalCursorWithDate />}
@@ -122,49 +138,63 @@ const AssetsVsDebtCardChart = memo(function AssetsVsDebtCardChart({
           <Line
             type="monotone"
             dataKey="debt"
-            stroke="#ff9264"
-            strokeWidth={3}
+            stroke={DEBT_COLOR}
+            strokeWidth={2.5}
             dot={({ index, cx, cy }) =>
               index === lastIdx ? (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={6}
-                  fill="#0d1117"
-                  stroke="#ff9264"
-                  strokeWidth={2}
-                />
+                <g filter="url(#glow)">
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill={BG_COLOR}
+                    stroke={DEBT_COLOR}
+                    strokeWidth={2}
+                  />
+                </g>
               ) : (
                 <></>
               )
             }
-            activeDot
+            activeDot={{
+              r: 5,
+              fill: BG_COLOR,
+              stroke: DEBT_COLOR,
+              strokeWidth: 2,
+            }}
           />
 
           <Line
             type="monotone"
             dataKey="assets"
-            stroke="#6fa8ff"
-            strokeWidth={3}
+            stroke={ASSETS_COLOR}
+            strokeWidth={2.5}
             dot={({ index, cx, cy }) =>
               index === lastIdx ? (
-                <circle
-                  cx={cx}
-                  cy={cy}
-                  r={6}
-                  fill="#0d1117"
-                  stroke="#6fa8ff"
-                  strokeWidth={2}
-                />
+                <g filter="url(#glow)">
+                  <circle
+                    cx={cx}
+                    cy={cy}
+                    r={5}
+                    fill={BG_COLOR}
+                    stroke={ASSETS_COLOR}
+                    strokeWidth={2}
+                  />
+                </g>
               ) : (
                 <></>
               )
             }
-            activeDot
+            activeDot={{
+              r: 5,
+              fill: BG_COLOR,
+              stroke: ASSETS_COLOR,
+              strokeWidth: 2,
+            }}
           />
         </LineChart>
       </ResponsiveContainer>
-    </>
+    </div>
   );
 });
 

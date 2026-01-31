@@ -3,18 +3,29 @@ import { SidebarTrigger } from '../ui/sidebar';
 
 export default function DashboardHeader() {
   return (
-    <>
-      <div className="flex p-2 items-center gap-3">
-        <SidebarTrigger />
+    <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b border-border">
+      <div className="flex px-6 py-3 items-center gap-4">
+        <SidebarTrigger className="hover:bg-accent transition-colors rounded-lg" />
         <Separator
           orientation="vertical"
-          className="data-[orientation=vertical]:h-4 bg-sidebar-border"
+          className="data-[orientation=vertical]:h-5 bg-border"
         />
-        <span className="text-md font-medium text-secondary-foreground">
-          Dashboard
-        </span>
+        <div className="flex items-baseline gap-3">
+          <h1 className="text-lg font-semibold tracking-tight text-foreground">
+            Dashboard
+          </h1>
+        </div>
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs font-mono text-muted-foreground">
+            {new Date().toLocaleDateString('en-US', { 
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric' 
+            })}
+          </span>
+          <div className="w-2 h-2 rounded-full bg-chart-5" />
+        </div>
       </div>
-      <Separator />
-    </>
+    </header>
   );
 }

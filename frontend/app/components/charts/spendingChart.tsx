@@ -1,9 +1,28 @@
 import { LineChart, Line, XAxis, YAxis, ResponsiveContainer } from 'recharts';
-import { ratioTocolor } from '@/lib/utils';
 
 const MONTHLY_BUDGET = 8000;
 const DAYS_IN_MONTH = 30;
 const DAILY_BUDGET_RATE = MONTHLY_BUDGET / DAYS_IN_MONTH;
+
+// Modern color palette for spending ratio
+const BG_COLOR = '#1a1d24';
+const EXPECTED_COLOR = '#3a3f4b';
+
+// Modern gradient colors - muted, sophisticated
+const COLOR_GREAT = '#22c55e';    // Green - well under budget
+const COLOR_GOOD = '#4ade80';     // Light green
+const COLOR_OK = '#facc15';       // Yellow - at budget
+const COLOR_WARNING = '#f97316';  // Orange - slightly over
+const COLOR_OVER = '#ef4444';     // Red - over budget
+
+// Convert ratio to modern color
+function ratioToColor(ratio: number): string {
+  if (ratio <= 0.7) return COLOR_GREAT;
+  if (ratio <= 0.85) return COLOR_GOOD;
+  if (ratio <= 1.0) return COLOR_OK;
+  if (ratio <= 1.15) return COLOR_WARNING;
+  return COLOR_OVER;
+}
 
 const rawSpending = [
   { dayNumber: 1, spent: 0 },
@@ -49,7 +68,7 @@ const data = Array.from({ length: DAYS_IN_MONTH }, (_, i) => {
     dayNumber,
     spent: actual,
     expectedSpending: expected,
-    color: ratio != null ? ratioTocolor(ratio) : null,
+    color: ratio != null ? ratioToColor(ratio) : null,
   };
 });
 
@@ -65,7 +84,7 @@ const latestPoint = realised[CURRENT_DAY_INDEX];
 export default function SpendingChart() {
   return (
     <ResponsiveContainer width="100%" height={130}>
-      <LineChart data={data}>
+      <LineChart data={data} margin={{ top: 10, right: 15, left: 10, bottom: 10 }}>
         <defs>
           <linearGradient id="spendingGradient" x1="0" y1="0" x2="1" y2="0">
             {gradientStops.map((s, i) => (
@@ -80,37 +99,51 @@ export default function SpendingChart() {
           domain={[0, Math.max(MONTHLY_BUDGET, latestPoint.spent!) * 1.1]}
         />
 
+        {/* Expected spending - subtle dashed line */}
         <Line
           type="monotone"
           dataKey="expectedSpending"
-          stroke="#6b7280"
-          strokeWidth={2}
-          strokeDasharray="4 4"
+          stroke={EXPECTED_COLOR}
+          strokeWidth={1.5}
+          strokeDasharray="3 6"
           dot={false}
           isAnimationActive={false}
         />
 
+        {/* Actual spending - gradient line */}
         <Line
           type="monotone"
           dataKey="spent"
           stroke="url(#spendingGradient)"
-          strokeWidth={3}
+          strokeWidth={2.5}
+          strokeLinecap="round"
           connectNulls={false}
           isAnimationActive={false}
-          dot={(d) => {
-            if (d.index !== CURRENT_DAY_INDEX) return <></>;
-            const color = latestPoint.color;
-            return (
-              <circle
-                cx={d.cx}
-                cy={d.cy}
-                r={6}
-                fill={color ?? undefined}
-                stroke="#000"
-                strokeWidth={2}
-              />
-            );
-          }}
+          dot={({ index, cx, cy }) =>
+            index === CURRENT_DAY_INDEX ? (
+              <g>
+                {/* Outer ring */}
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={6}
+                  fill="none"
+                  stroke={latestPoint.color ?? undefined}
+                  strokeWidth={2}
+                  opacity={0.3}
+                />
+                {/* Inner filled circle */}
+                <circle
+                  cx={cx}
+                  cy={cy}
+                  r={4}
+                  fill={latestPoint.color ?? undefined}
+                />
+              </g>
+            ) : (
+              <></>
+            )
+          }
         />
       </LineChart>
     </ResponsiveContainer>

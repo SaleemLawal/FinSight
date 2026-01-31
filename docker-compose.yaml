@@ -11,6 +11,7 @@ services:
       - backend
     networks:
       - frontend
+
   backend:
     init: true
     image: backend:latest
@@ -35,6 +36,7 @@ services:
       - type: bind
         source: ./backend/server
         target: /app
+
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
@@ -47,6 +49,7 @@ services:
       - postgres
     networks:
       - backend
+
   postgres:
     image: postgres:15
     container_name: finsight-postgres
@@ -68,6 +71,7 @@ services:
       retries: 5
     networks:
       - backend
+
 volumes:
   postgres_data:
 networks:

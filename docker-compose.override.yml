@@ -1,0 +1,7 @@
+services:
+  frontend:
+    volumes:
+      - ./frontend:/app
+    command: npm run dev
+    ports:
+      - "5173:5173"

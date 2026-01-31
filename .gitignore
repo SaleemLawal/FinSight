@@ -29,3 +29,5 @@ build/
 
 backend/server/.env*
 backend/server/main
+
+.cursor/

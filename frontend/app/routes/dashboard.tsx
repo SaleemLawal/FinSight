@@ -6,21 +6,28 @@ import { useState } from 'react';
 import type { RangeKey } from 'types';
 
 export function meta({}: Route.MetaArgs) {
-  return [{ title: 'FinSight' }, { name: 'description', content: 'FinSight' }];
+  return [{ title: 'FinSight | Financial Command Center' }, { name: 'description', content: 'Your personal financial command center' }];
 }
 
 export default function Home() {
   const [range, setRange] = useState<RangeKey>('1W');
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       <DashboardHeader />
-      <div className="p-8">
-        <div className="grid grid-cols-2 gap-4">
-          <MonthlySpending />
-          <AssetsVsDebt range={range} setRange={setRange} />
+      
+      {/* Main Content */}
+      <main className="p-6">
+        {/* Dashboard Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          <div className="animate-fade-in-up stagger-1 flex">
+            <MonthlySpending />
+          </div>
+          <div className="animate-fade-in-up stagger-2 flex">
+            <AssetsVsDebt range={range} setRange={setRange} />
+          </div>
         </div>
-      </div>
-    </>
+      </main>
+    </div>
   );
 }
